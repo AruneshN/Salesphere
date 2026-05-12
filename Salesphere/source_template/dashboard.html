@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>SaleSphere — Dashboard</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --sidebar-bg:#0f1117;
+    --page-bg:#f5f4f0;
+    --card-bg:#ffffff;
+    --text-primary:#0f1117;
+    --text-muted:#7a7a85;
+    --text-light:#b0b0bb;
+    --border:#e8e7e2;
+    --accent:#2563ff;
+    --accent-light:#eff3ff;
+    --success:#16a34a;
+    --success-light:#f0fdf4;
+    --warning:#d97706;
+    --warning-light:#fffbeb;
+    --danger:#dc2626;
+    --danger-light:#fef2f2;
+    --font:'DM Sans',sans-serif;
+    --mono:'Space Mono',monospace;
+  }
+  html,body{height:100%;width:100%;overflow:hidden}
+  body{font-family:var(--font);background:var(--page-bg);color:var(--text-primary);display:flex;font-size:13px}
+
+  /* SIDEBAR */
+  .sidebar{width:220px;min-width:220px;height:100vh;background:var(--sidebar-bg);display:flex;flex-direction:column;padding:0 0 16px;overflow-y:auto;flex-shrink:0}
+  .logo{padding:22px 20px 16px;border-bottom:1px solid rgba(255,255,255,0.07);margin-bottom:8px}
+  .logo-mark{display:flex;align-items:center;gap:10px}
+  .logo-icon{width:32px;height:32px;border-radius:9px;background:linear-gradient(135deg,#2563ff,#7c3aed);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .logo-text{font-family:var(--mono);font-size:14px;font-weight:700;color:#fff;letter-spacing:-0.3px;line-height:1.15}
+  .logo-text span{color:rgba(255,255,255,0.38);font-weight:400;font-size:9px;display:block;letter-spacing:1.2px;text-transform:uppercase;margin-top:2px}
+  .nav-section{padding:10px 14px 4px;font-size:9px;text-transform:uppercase;letter-spacing:1.8px;color:rgba(255,255,255,0.22);margin-top:6px}
+  .nav-item{display:flex;align-items:center;gap:11px;padding:10px 18px;cursor:pointer;color:rgba(255,255,255,0.52);font-size:13px;font-weight:400;border-radius:7px;margin:1px 10px;transition:all 0.15s;user-select:none}
+  .nav-item:hover{color:rgba(255,255,255,0.88);background:rgba(255,255,255,0.06)}
+  .nav-item.active{color:#fff;background:rgba(37,99,255,0.28);font-weight:500}
+  .nav-icon{width:15px;height:15px;opacity:0.65;flex-shrink:0}
+  .nav-item.active .nav-icon{opacity:1}
+  .nav-badge{margin-left:auto;background:#dc2626;color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;font-family:var(--mono)}
+  .sidebar-footer{margin-top:auto;padding:14px 16px 0;border-top:1px solid rgba(255,255,255,0.07)}
+  .user-row{display:flex;align-items:center;gap:10px}
+  .user-avatar{width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#2563ff,#7c3aed);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:#fff;flex-shrink:0;font-family:var(--mono)}
+  .user-name{font-size:12px;color:rgba(255,255,255,0.82);font-weight:500}
+  .user-role{font-size:10px;color:rgba(255,255,255,0.32)}
+
+  /* MAIN */
+  .main{flex:1;display:flex;flex-direction:column;height:100vh;overflow:hidden;min-width:0}
+  .topbar{display:flex;align-items:center;justify-content:space-between;padding:0 28px;height:58px;min-height:58px;background:#fff;border-bottom:1px solid var(--border);flex-shrink:0}
+  .topbar-title{font-size:16px;font-weight:600;letter-spacing:-0.4px}
+  .topbar-sub{font-size:11px;color:var(--text-muted);margin-top:1px}
+  .topbar-right{display:flex;align-items:center;gap:10px}
+  .btn{display:inline-flex;align-items:center;gap:6px;padding:7px 15px;border-radius:8px;font-size:12px;font-weight:500;cursor:pointer;border:none;font-family:var(--font);transition:all 0.15s;white-space:nowrap}
+  .btn-primary{background:#2563ff;color:#fff}
+  .btn-primary:hover{background:#1d50e0}
+  .btn-ghost{background:transparent;color:var(--text-primary);border:1px solid var(--border)}
+  .btn-ghost:hover{background:var(--page-bg)}
+  .notif-btn{width:34px;height:34px;border-radius:8px;background:var(--page-bg);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative;flex-shrink:0}
+  .notif-dot{width:7px;height:7px;border-radius:50%;background:#dc2626;position:absolute;top:6px;right:7px;border:1.5px solid #fff}
+  .sphere-tag{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;background:linear-gradient(135deg,rgba(37,99,255,0.09),rgba(124,58,237,0.09));border:1px solid rgba(37,99,255,0.2);font-size:10px;font-weight:500;color:#2563ff;white-space:nowrap}
+
+  /* CONTENT SCROLL */
+  .content{flex:1;overflow-y:auto;padding:20px 28px 28px;display:flex;flex-direction:column;gap:18px}
+
+  /* QUICK ACTIONS */
+  .quick-actions{display:flex;gap:10px;flex-wrap:wrap}
+  .qa-btn{display:flex;align-items:center;gap:8px;padding:9px 16px;border-radius:10px;font-size:12px;font-weight:500;cursor:pointer;border:1.5px solid var(--border);background:#fff;color:var(--text-primary);font-family:var(--font);transition:all 0.15s}
+  .qa-btn:hover{border-color:#2563ff;color:#2563ff;background:var(--accent-light)}
+  .qa-icon{width:24px;height:24px;border-radius:6px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+
+  /* KPI GRID */
+  .kpi-grid{display:grid;grid-template-columns:repeat(6,minmax(0,1fr));gap:13px}
+  .kpi-card{background:#fff;border-radius:13px;padding:15px 16px;border:1px solid var(--border)}
+  .kpi-ico-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:11px}
+  .kpi-ico{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+  .kpi-label{font-size:10px;color:var(--text-muted);font-weight:500;text-transform:uppercase;letter-spacing:0.6px;margin-bottom:5px}
+  .kpi-val{font-size:22px;font-weight:600;letter-spacing:-0.6px;font-family:var(--mono);line-height:1}
+  .kpi-badge{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:500;padding:2px 7px;border-radius:20px;margin-top:7px}
+  .badge-up{background:var(--success-light);color:var(--success)}
+  .badge-down{background:var(--danger-light);color:var(--danger)}
+  .badge-warn{background:var(--warning-light);color:var(--warning)}
+
+  /* TWO COL */
+  .two-col{display:grid;grid-template-columns:1fr 340px;gap:16px}
+  .card{background:#fff;border-radius:14px;border:1px solid var(--border);padding:18px 20px}
+  .card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:16px}
+  .card-title{font-size:13px;font-weight:600;letter-spacing:-0.2px}
+  .card-sub{font-size:10px;color:var(--text-muted);margin-top:2px}
+
+  /* ALERTS */
+  .alert-item{display:flex;align-items:center;gap:11px;padding:10px 0;border-bottom:1px solid var(--border)}
+  .alert-item:last-child{border-bottom:none}
+  .alert-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+  .dot-danger{background:#dc2626}
+  .dot-warn{background:#d97706}
+  .alert-name{font-size:12px;font-weight:500}
+  .alert-sub{font-size:10px;color:var(--text-muted);margin-top:1px}
+  .alert-qty{font-family:var(--mono);font-size:13px;font-weight:700;margin-left:auto}
+
+  /* THREE COL */
+  .three-col{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+
+  /* TABLE */
+  table{width:100%;border-collapse:collapse}
+  thead th{font-size:10px;text-transform:uppercase;letter-spacing:0.9px;color:var(--text-muted);font-weight:500;padding:0 0 10px;text-align:left;border-bottom:1px solid var(--border)}
+  tbody tr{border-bottom:1px solid var(--border)}
+  tbody tr:last-child{border-bottom:none}
+  tbody td{padding:10px 0;font-size:12px;vertical-align:middle}
+  tbody tr:hover td{background:rgba(0,0,0,0.015)}
+  .bill-no{font-family:var(--mono);font-size:11px;color:var(--accent)}
+  .status-pill{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:10px;font-weight:500}
+  .s-paid{background:#f0fdf4;color:#16a34a}
+  .s-pending{background:#eff6ff;color:#2563eb}
+  .s-overdue{background:#fef2f2;color:#dc2626}
+
+  /* TOP SELLING */
+  .topsell-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+  .topsell-row:last-child{border-bottom:none}
+  .topsell-rank{width:20px;font-size:10px;color:var(--text-light);font-family:var(--mono);flex-shrink:0}
+  .topsell-name{flex:1;font-size:12px;font-weight:500}
+  .topsell-bar-wrap{width:70px;height:4px;background:#f0eeea;border-radius:3px;flex-shrink:0}
+  .topsell-bar{height:4px;border-radius:3px;background:#2563ff}
+  .topsell-qty{font-family:var(--mono);font-size:11px;color:var(--text-muted);width:32px;text-align:right;flex-shrink:0}
+
+  /* CHART */
+  .chart-wrap{position:relative;width:100%;height:160px}
+
+  /* SCROLLBAR */
+  .content::-webkit-scrollbar{width:5px}
+  .content::-webkit-scrollbar-track{background:transparent}
+  .content::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<div class="sidebar">
+  <div class="logo">
+    <div class="logo-mark">
+      <div class="logo-icon">
+        <svg width="17" height="17" viewBox="0 0 16 16" fill="none">
+          <circle cx="8" cy="8" r="5.5" stroke="white" stroke-width="1.4"/>
+          <ellipse cx="8" cy="8" rx="2.5" ry="5.5" stroke="white" stroke-width="1.1"/>
+          <line x1="2.5" y1="8" x2="13.5" y2="8" stroke="white" stroke-width="1.1"/>
+        </svg>
+      </div>
+      <div class="logo-text">SaleSphere<span>Billing + Inventory</span></div>
+    </div>
+  </div>
+
+  <div class="nav-section">Main</div>
+  <div class="nav-item active">
+    <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>
+    Dashboard
+  </div>
+  <div class="nav-item">
+    <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a2.5 2.5 0 100 5 2.5 2.5 0 000-5zM3 11.5C3 9.567 5.239 8 8 8s5 1.567 5 3.5V14H3v-2.5z"/></svg>
+    Customers
+  </div>
+  <div class="nav-item">
+    <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M3 2h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1zm1 3v6h8V5H4zm0-2v1h8V3H4z"/></svg>
+    Products
+  </div>
+  <div class="nav-item">
+    <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M2 3h12v2H2zM2 7h8v2H2zM2 11h6v2H2z"/></svg>
+    Bills
+    <span class="nav-badge">3</span>
+  </div>
+  <div class="nav-item">
+    <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M5 3V2M11 3V2M2 7h12" stroke="currentColor" stroke-width="1.2"/></svg>
+    Inventory
+    <span class="nav-badge">23</span>
+  </div>
+
+  <div class="nav-section">Finance</div>
+  <div class="nav-item">
+    <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2" stroke-linecap="round"/></svg>
+    Payments
+  </div>
+  <div class="nav-item">
+    <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2 12h12M4 9l2-3 3 2 3-5"/></svg>
+    Reports
+  </div>
+
+  <div class="nav-section">System</div>
+  <div class="nav-item">
+    <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="8" cy="8" r="2.5"/><path d="M8 1.5v1M8 13.5v1M1.5 8h1M13.5 8h1M3.4 3.4l.7.7M11.9 11.9l.7.7M3.4 12.6l.7-.7M11.9 4.1l.7-.7"/></svg>
+    Settings
+  </div>
+
+  <div class="sidebar-footer">
+    <div class="user-row">
+      <div class="user-avatar">RS</div>
+      <div>
+        <!-- <div class="user-name">Rajesh S.</div> -->
+
+        <div class="user-name">{{ request.user.first_name }}</div>
+        <div class="user-role">Administrator</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title">Dashboard Overview</div>
+      <div class="topbar-sub">Tuesday, 6 May 2025</div>
+    </div>
+    <div class="topbar-right">
+      <div class="sphere-tag">
+        <svg width="10" height="10" viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="5" stroke="#2563ff" stroke-width="1.5"/><ellipse cx="8" cy="8" rx="2.5" ry="5" stroke="#2563ff" stroke-width="1.2"/><line x1="3" y1="8" x2="13" y2="8" stroke="#2563ff" stroke-width="1.2"/></svg>
+        SaleSphere v1.0
+      </div>
+      <div class="notif-btn">
+        <svg width="15" height="15" viewBox="0 0 16 16" fill="#7a7a85"><path d="M8 1a5 5 0 00-5 5v2.5L1.5 10v1h13v-1L13 8.5V6a5 5 0 00-5-5zm0 13a2 2 0 01-2-2h4a2 2 0 01-2 2z"/></svg>
+        <div class="notif-dot"></div>
+      </div>
+      <button class="btn btn-ghost">Export</button>
+      <button class="btn btn-primary">+ New Bill</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+    <!-- QUICK ACTIONS -->
+    <div class="quick-actions">
+      <button class="qa-btn">
+        <span class="qa-icon" style="background:#eff3ff">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="#2563ff"><path d="M8 2v12M2 8h12"/></svg>
+        </span>
+        Add Product
+      </button>
+      <button class="qa-btn">
+        <span class="qa-icon" style="background:#f0fdf4">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="#16a34a"><path d="M2 3h12v2H2zM2 7h8v2H2zM2 11h6v2H2z"/></svg>
+        </span>
+        Create Bill
+      </button>
+      <button class="qa-btn">
+        <span class="qa-icon" style="background:#fdf4ff">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="#9333ea"><path d="M8 1a3 3 0 100 6 3 3 0 000-6zM3 13s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3z"/></svg>
+        </span>
+        Add Customer
+      </button>
+      <button class="qa-btn">
+        <span class="qa-icon" style="background:#fef2f2">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#dc2626" stroke-width="1.5"><path d="M8 1L1 14h14L8 1z"/><path d="M8 6v3M8 11v1"/></svg>
+        </span>
+        Stock Alerts
+      </button>
+      <button class="qa-btn">
+        <span class="qa-icon" style="background:#fffbeb">
+          <svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#d97706" stroke-width="1.4"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2" stroke-linecap="round"/></svg>
+        </span>
+        Today's Sales
+      </button>
+    </div>
+
+    <!-- KPI CARDS -->
+    <div class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-ico-row">
+          <div class="kpi-ico" style="background:#eff3ff">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="#2563ff"><path d="M3 2h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1zm1 3v6h8V5H4z"/></svg>
+          </div>
+        </div>
+        <div class="kpi-label">Total Products</div>
+        <div class="kpi-val">1,284</div>
+        <div class="kpi-badge badge-up">↑ 12 this week</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-ico-row">
+          <div class="kpi-ico" style="background:#fdf4ff">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="#9333ea"><path d="M8 1a3 3 0 100 6 3 3 0 000-6zM3 13s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3z"/></svg>
+          </div>
+        </div>
+        <div class="kpi-label">Customers</div>
+        <div class="kpi-val">847</div>
+        <div class="kpi-badge badge-up">↑ 5 new</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-ico-row">
+          <div class="kpi-ico" style="background:#f0fdf4">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="#16a34a"><path d="M2 3h12v2H2zM2 7h8v2H2zM2 11h6v2H2z"/></svg>
+          </div>
+        </div>
+        <div class="kpi-label">Total Bills</div>
+        <div class="kpi-val">3,521</div>
+        <div class="kpi-badge badge-up">↑ 34 this month</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-ico-row">
+          <div class="kpi-ico" style="background:#eff3ff">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#2563ff" stroke-width="1.4"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2" stroke-linecap="round"/></svg>
+          </div>
+        </div>
+        <div class="kpi-label">Revenue</div>
+        <div class="kpi-val" style="font-size:19px">₹4.8L</div>
+        <div class="kpi-badge badge-up">↑ 18% vs last mo</div>
+      </div>
+      <div class="kpi-card" style="border-color:#fecaca">
+        <div class="kpi-ico-row">
+          <div class="kpi-ico" style="background:#fef2f2">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#dc2626" stroke-width="1.5"><path d="M8 1L1 14h14L8 1z"/><path d="M8 6v3M8 11v1"/></svg>
+          </div>
+        </div>
+        <div class="kpi-label">Low Stock</div>
+        <div class="kpi-val" style="color:#dc2626">23</div>
+        <div class="kpi-badge badge-down">6 critical</div>
+      </div>
+      <div class="kpi-card" style="border-color:#bbf7d0">
+        <div class="kpi-ico-row">
+          <div class="kpi-ico" style="background:#f0fdf4">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round"><path d="M2 12h12M4 9l2-3 3 2 3-5"/></svg>
+          </div>
+        </div>
+        <div class="kpi-label">Today's Sales</div>
+        <div class="kpi-val" style="font-size:19px">₹12,450</div>
+        <div class="kpi-badge badge-up">8 bills today</div>
+      </div>
+    </div>
+
+    <!-- SALES CHART + STOCK ALERTS -->
+    <div class="two-col">
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Sales trend</div>
+            <div class="card-sub">Last 7 days · Daily revenue (₹)</div>
+          </div>
+          <div style="display:flex;gap:24px">
+            <div style="text-align:right">
+              <div style="font-size:10px;color:var(--text-muted)">Week total</div>
+              <div style="font-family:var(--mono);font-weight:600;font-size:13px">₹80,250</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:10px;color:var(--text-muted)">Peak day</div>
+              <div style="font-family:var(--mono);font-weight:600;font-size:13px">₹14,300</div>
+            </div>
+            <div style="text-align:right">
+              <div style="font-size:10px;color:var(--text-muted)">Avg/day</div>
+              <div style="font-family:var(--mono);font-weight:600;font-size:13px">₹11,464</div>
+            </div>
+          </div>
+        </div>
+        <div class="chart-wrap">
+          <canvas id="salesChart"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div>
+            <div class="card-title">Stock alerts</div>
+            <div class="card-sub">Requires attention</div>
+          </div>
+          <span style="background:#fef2f2;color:#dc2626;font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;font-family:var(--mono)">23 items</span>
+        </div>
+        <div class="alert-item">
+          <div class="alert-dot dot-danger"></div>
+          <div><div class="alert-name">Bluetooth Headphones Pro</div><div class="alert-sub">Out of stock</div></div>
+          <div class="alert-qty" style="color:#dc2626">0</div>
+        </div>
+        <div class="alert-item">
+          <div class="alert-dot dot-danger"></div>
+          <div><div class="alert-name">USB-C Hub 7-in-1</div><div class="alert-sub">Critical — reorder now</div></div>
+          <div class="alert-qty" style="color:#dc2626">2</div>
+        </div>
+        <div class="alert-item">
+          <div class="alert-dot dot-warn"></div>
+          <div><div class="alert-name">Wireless Keyboard MX</div><div class="alert-sub">Below min threshold</div></div>
+          <div class="alert-qty" style="color:#d97706">7</div>
+        </div>
+        <div class="alert-item">
+          <div class="alert-dot dot-warn"></div>
+          <div><div class="alert-name">Gaming Mouse RGB</div><div class="alert-sub">Low stock warning</div></div>
+          <div class="alert-qty" style="color:#d97706">9</div>
+        </div>
+        <div class="alert-item">
+          <div class="alert-dot dot-warn"></div>
+          <div><div class="alert-name">LED Monitor 24"</div><div class="alert-sub">Below min threshold</div></div>
+          <div class="alert-qty" style="color:#d97706">4</div>
+        </div>
+        <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:14px;font-size:11px">View all 23 alerts →</button>
+      </div>
+    </div>
+
+    <!-- RECENT BILLS + TOP SELLING -->
+    <div class="three-col">
+      <div class="card" style="grid-column:span 2">
+        <div class="card-header">
+          <div class="card-title">Recent bills</div>
+          <button class="btn btn-ghost" style="font-size:11px;padding:5px 11px">View all →</button>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Bill no.</th>
+              <th>Customer</th>
+              <th>Date</th>
+              <th>Amount</th>
+              <th>Status</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="bill-no">#SS-1031</span></td>
+              <td>Ravi Kumar</td>
+              <td style="color:var(--text-muted)">Today, 4:12 pm</td>
+              <td style="font-family:var(--mono);font-weight:600">₹3,200</td>
+              <td><span class="status-pill s-paid">Paid</span></td>
+            </tr>
+            <tr>
+              <td><span class="bill-no">#SS-1030</span></td>
+              <td>Meena Textiles</td>
+              <td style="color:var(--text-muted)">Today, 1:45 pm</td>
+              <td style="font-family:var(--mono);font-weight:600">₹8,750</td>
+              <td><span class="status-pill s-pending">Pending</span></td>
+            </tr>
+            <tr>
+              <td><span class="bill-no">#SS-1029</span></td>
+              <td>Anand Stores</td>
+              <td style="color:var(--text-muted)">Today, 11:20 am</td>
+              <td style="font-family:var(--mono);font-weight:600">₹560</td>
+              <td><span class="status-pill s-paid">Paid</span></td>
+            </tr>
+            <tr>
+              <td><span class="bill-no">#SS-1028</span></td>
+              <td>Kavitha Electronics</td>
+              <td style="color:var(--text-muted)">Yesterday</td>
+              <td style="font-family:var(--mono);font-weight:600">₹12,400</td>
+              <td><span class="status-pill s-paid">Paid</span></td>
+            </tr>
+            <tr>
+              <td><span class="bill-no">#SS-1027</span></td>
+              <td>Selvam Traders</td>
+              <td style="color:var(--text-muted)">Yesterday</td>
+              <td style="font-family:var(--mono);font-weight:600">₹1,890</td>
+              <td><span class="status-pill s-overdue">Overdue</span></td>
+            </tr>
+            <tr>
+              <td><span class="bill-no">#SS-1026</span></td>
+              <td>Priya Hardware</td>
+              <td style="color:var(--text-muted)">2 days ago</td>
+              <td style="font-family:var(--mono);font-weight:600">₹4,300</td>
+              <td><span class="status-pill s-paid">Paid</span></td>
+            </tr>
+            <tr>
+              <td><span class="bill-no">#SS-1025</span></td>
+              <td>Sundar Mobile Shop</td>
+              <td style="color:var(--text-muted)">2 days ago</td>
+              <td style="font-family:var(--mono);font-weight:600">₹6,100</td>
+              <td><span class="status-pill s-paid">Paid</span></td>
+            </tr>
+            <tr>
+              <td><span class="bill-no">#SS-1024</span></td>
+              <td>Lakshmi Traders</td>
+              <td style="color:var(--text-muted)">3 days ago</td>
+              <td style="font-family:var(--mono);font-weight:600">₹2,750</td>
+              <td><span class="status-pill s-overdue">Overdue</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title">Top selling products</div>
+          <div style="font-size:10px;color:var(--text-muted)">This month</div>
+        </div>
+        <div class="topsell-row">
+          <div class="topsell-rank">01</div>
+          <div class="topsell-name">LED Bulb 9W Pack</div>
+          <div class="topsell-bar-wrap"><div class="topsell-bar" style="width:100%"></div></div>
+          <div class="topsell-qty">342</div>
+        </div>
+        <div class="topsell-row">
+          <div class="topsell-rank">02</div>
+          <div class="topsell-name">USB-C Cable 2m</div>
+          <div class="topsell-bar-wrap"><div class="topsell-bar" style="width:80%"></div></div>
+          <div class="topsell-qty">275</div>
+        </div>
+        <div class="topsell-row">
+          <div class="topsell-rank">03</div>
+          <div class="topsell-name">Thermal Paste 5g</div>
+          <div class="topsell-bar-wrap"><div class="topsell-bar" style="width:62%"></div></div>
+          <div class="topsell-qty">213</div>
+        </div>
+        <div class="topsell-row">
+          <div class="topsell-rank">04</div>
+          <div class="topsell-name">AA Battery 8-pack</div>
+          <div class="topsell-bar-wrap"><div class="topsell-bar" style="width:50%"></div></div>
+          <div class="topsell-qty">172</div>
+        </div>
+        <div class="topsell-row">
+          <div class="topsell-rank">05</div>
+          <div class="topsell-name">HDMI Cable 1.5m</div>
+          <div class="topsell-bar-wrap"><div class="topsell-bar" style="width:38%"></div></div>
+          <div class="topsell-qty">131</div>
+        </div>
+        <div class="topsell-row">
+          <div class="topsell-rank">06</div>
+          <div class="topsell-name">Surge Protector 6pt</div>
+          <div class="topsell-bar-wrap"><div class="topsell-bar" style="width:26%"></div></div>
+          <div class="topsell-qty">89</div>
+        </div>
+        <div class="topsell-row">
+          <div class="topsell-rank">07</div>
+          <div class="topsell-name">Ethernet Cable Cat6</div>
+          <div class="topsell-bar-wrap"><div class="topsell-bar" style="width:18%"></div></div>
+          <div class="topsell-qty">62</div>
+        </div>
+        <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:14px;font-size:11px">Full report →</button>
+      </div>
+    </div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+
+<script>
+  const days = ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'];
+  const vals = [8400,11200,9800,14300,10500,13600,12450];
+  new Chart(document.getElementById('salesChart'),{
+    type:'bar',
+    data:{
+      labels:days,
+      datasets:[{
+        label:'Revenue (₹)',
+        data:vals,
+        backgroundColor:vals.map((_,i)=>i===3?'#2563ff':'rgba(37,99,255,0.15)'),
+        borderColor:vals.map((_,i)=>i===3?'#1d50e0':'rgba(37,99,255,0.4)'),
+        borderWidth:1.5,
+        borderRadius:6,
+        borderSkipped:false
+      }]
+    },
+    options:{
+      responsive:true,
+      maintainAspectRatio:false,
+      plugins:{
+        legend:{display:false},
+        tooltip:{callbacks:{label:ctx=>'₹'+ctx.raw.toLocaleString('en-IN')}}
+      },
+      scales:{
+        x:{grid:{display:false},ticks:{font:{size:11},color:'#7a7a85'}},
+        y:{
+          grid:{color:'rgba(0,0,0,0.04)'},
+          ticks:{font:{size:10},color:'#7a7a85',callback:v=>'₹'+(v/1000).toFixed(0)+'k'}
+        }
+      }
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SaleSphere — Create Store Account</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700;800&family=Barlow+Condensed:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --orange: #E8721C;
+    --orange-hover: #cf6518;
+    --navy: #1A2744;
+    --navy-light: #243058;
+    --navy-card: #1E2D52;
+    --text-dark: #1A2744;
+    --text-mid: #4a5568;
+    --text-light: #94a3b8;
+    --white: #ffffff;
+    --input-bg: #f0f4f8;
+    --input-border: #dde3ee;
+    --success: #22c55e;
+    --error: #ef4444;
+  }
+
+  body {
+    font-family: 'Barlow', sans-serif;
+    background: #e8ecf3;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background-image: radial-gradient(ellipse at 20% 50%, rgba(232,114,28,0.07) 0%, transparent 60%),
+                      radial-gradient(ellipse at 80% 20%, rgba(26,39,68,0.08) 0%, transparent 50%);
+  }
+
+  .card {
+    background: white;
+    border-radius: 24px;
+    box-shadow: 0 20px 60px rgba(26,39,68,0.14), 0 4px 16px rgba(26,39,68,0.06);
+    display: flex;
+    width: 100%;
+    max-width: 920px;
+    min-height: 620px;
+    overflow: hidden;
+    animation: cardIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(24px) scale(0.98); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+
+  /* ── LEFT PANEL ── */
+  .left {
+    flex: 1;
+    padding: 44px 48px;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+
+  .logo-icon {
+    width: 38px; height: 38px;
+    background: var(--orange);
+    border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; color: white; font-size: 17px; letter-spacing: -1px;
+  }
+
+  .logo-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 24px; font-weight: 700; letter-spacing: 0.5px;
+    color: var(--navy);
+  }
+  .logo-text span { color: var(--orange); }
+
+  .tagline {
+    font-size: 10px; letter-spacing: 3px; color: var(--text-light);
+    text-transform: uppercase; font-weight: 600; margin-bottom: 28px;
+  }
+
+  h1 {
+    font-size: 26px; font-weight: 800; color: var(--text-dark);
+    line-height: 1.2; margin-bottom: 6px;
+  }
+  .subtitle {
+    font-size: 14px; color: var(--text-mid); margin-bottom: 28px;
+  }
+
+  /* STEP INDICATOR */
+  .steps {
+    display: flex; gap: 6px; align-items: center; margin-bottom: 28px;
+  }
+  .step-dot {
+    height: 4px; border-radius: 2px; background: var(--input-border);
+    transition: all 0.3s;
+  }
+  .step-dot.active { background: var(--orange); width: 28px; }
+  .step-dot:not(.active) { width: 14px; }
+  .step-dot.done { background: var(--orange); opacity: 0.4; width: 14px; }
+
+  .step-label {
+    font-size: 11px; color: var(--text-light); font-weight: 600;
+    letter-spacing: 1px; text-transform: uppercase; margin-left: 4px;
+  }
+
+  /* FORM */
+  .form-page { display: none; flex-direction: column; gap: 16px; }
+  .form-page.active { display: flex; animation: fadeSlide 0.35s ease both; }
+
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateX(18px); }
+    to   { opacity: 1; transform: translateX(0); }
+  }
+
+  .row { display: flex; gap: 14px; }
+  .row .field { flex: 1; }
+
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 12px; font-weight: 700; color: var(--text-dark); letter-spacing: 0.3px; }
+
+  .input-wrap {
+    position: relative; display: flex; align-items: center;
+  }
+  .input-wrap svg.prefix {
+    position: absolute; left: 14px; color: var(--text-light);
+    width: 16px; height: 16px; pointer-events: none;
+  }
+  .input-wrap svg.suffix {
+    position: absolute; right: 14px; color: var(--text-light);
+    width: 16px; height: 16px; cursor: pointer; transition: color 0.2s;
+  }
+  .input-wrap svg.suffix:hover { color: var(--navy); }
+
+  input[type="text"], input[type="email"], input[type="password"], input[type="tel"], select {
+    width: 100%; padding: 12px 40px 12px 40px;
+    background: var(--input-bg); border: 1.5px solid var(--input-border);
+    border-radius: 10px; font-family: 'Barlow', sans-serif;
+    font-size: 14px; color: var(--text-dark); outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s, background 0.2s;
+    appearance: none;
+  }
+  input:not([type="password"]) { padding-right: 14px; }
+  input[type="password"] { letter-spacing: 2px; }
+
+  input:focus, select:focus {
+    border-color: var(--orange);
+    background: white;
+    box-shadow: 0 0 0 3px rgba(232,114,28,0.12);
+  }
+
+  input.has-error { border-color: var(--error); }
+  .field-error { font-size: 11px; color: var(--error); font-weight: 500; }
+
+  select { padding-left: 40px; cursor: pointer; }
+
+  .check-row {
+    display: flex; align-items: flex-start; gap: 10px;
+  }
+  .check-row input[type="checkbox"] {
+    width: 16px; height: 16px; min-width: 16px; padding: 0;
+    accent-color: var(--orange); cursor: pointer; margin-top: 1px;
+  }
+  .check-row label {
+    font-size: 12px; color: var(--text-mid); line-height: 1.5; cursor: pointer;
+  }
+  .check-row label a { color: var(--orange); text-decoration: none; font-weight: 600; }
+  .check-row label a:hover { text-decoration: underline; }
+
+  .btn-primary {
+    width: 100%; padding: 14px;
+    background: var(--orange); color: white;
+    border: none; border-radius: 10px; cursor: pointer;
+    font-family: 'Barlow', sans-serif; font-size: 13px;
+    font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+    transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+    box-shadow: 0 4px 14px rgba(232,114,28,0.35);
+  }
+  .btn-primary:hover {
+    background: var(--orange-hover);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 20px rgba(232,114,28,0.45);
+  }
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-secondary {
+    width: 100%; padding: 13px;
+    background: transparent; color: var(--text-mid);
+    border: 1.5px solid var(--input-border); border-radius: 10px; cursor: pointer;
+    font-family: 'Barlow', sans-serif; font-size: 13px;
+    font-weight: 700; letter-spacing: 0.5px;
+    transition: border-color 0.2s, color 0.2s;
+    margin-top: 2px;
+  }
+  .btn-secondary:hover { border-color: var(--navy); color: var(--navy); }
+
+  .divider {
+    display: flex; align-items: center; gap: 12px;
+    color: var(--text-light); font-size: 12px; font-weight: 600;
+  }
+  .divider::before, .divider::after {
+    content: ''; flex: 1; height: 1px; background: var(--input-border);
+  }
+
+  .social-row { display: flex; gap: 10px; }
+  .social-btn {
+    flex: 1; padding: 10px;
+    background: var(--input-bg); border: 1.5px solid var(--input-border);
+    border-radius: 10px; cursor: pointer; display: flex;
+    align-items: center; justify-content: center; gap: 8px;
+    font-family: 'Barlow', sans-serif; font-size: 12px;
+    color: var(--text-dark); font-weight: 600;
+    transition: border-color 0.2s, background 0.2s;
+  }
+  .social-btn:hover { border-color: var(--text-mid); background: white; }
+  .social-btn svg { width: 18px; height: 18px; }
+
+  .signin-link {
+    text-align: center; font-size: 13px; color: var(--text-mid); margin-top: 4px;
+  }
+  .signin-link a { color: var(--orange); font-weight: 700; text-decoration: none; }
+  .signin-link a:hover { text-decoration: underline; }
+
+  /* SUCCESS STATE */
+  .success-screen {
+    display: none; flex-direction: column; align-items: center;
+    text-align: center; gap: 16px; padding: 20px 0;
+    animation: fadeSlide 0.4s ease both;
+  }
+  .success-screen.active { display: flex; }
+
+  .success-icon {
+    width: 72px; height: 72px;
+    background: linear-gradient(135deg, var(--orange), #f59e0b);
+    border-radius: 50%; display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 8px 24px rgba(232,114,28,0.35);
+    animation: popIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) 0.1s both;
+  }
+  @keyframes popIn {
+    from { transform: scale(0); }
+    to   { transform: scale(1); }
+  }
+  .success-icon svg { width: 36px; height: 36px; color: white; stroke-width: 3; }
+
+  .success-screen h2 { font-size: 22px; font-weight: 800; color: var(--text-dark); }
+  .success-screen p { font-size: 14px; color: var(--text-mid); line-height: 1.6; max-width: 280px; }
+
+  /* ── RIGHT PANEL ── */
+  .right {
+    width: 320px; min-width: 320px;
+    background: var(--navy);
+    border-radius: 0 24px 24px 0;
+    padding: 44px 36px;
+    display: flex; flex-direction: column;
+    position: relative; overflow: hidden;
+  }
+
+  .right::before {
+    content: ''; position: absolute;
+    width: 280px; height: 280px;
+    border: 60px solid rgba(255,255,255,0.04);
+    border-radius: 50%;
+    top: -80px; right: -80px;
+    pointer-events: none;
+  }
+  .right::after {
+    content: ''; position: absolute;
+    width: 180px; height: 180px;
+    border: 40px solid rgba(255,255,255,0.03);
+    border-radius: 50%;
+    bottom: 60px; left: -60px;
+    pointer-events: none;
+  }
+
+  .right-logo { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin-bottom: 32px; }
+  .right-logo-icon {
+    width: 52px; height: 52px;
+    background: var(--orange); border-radius: 14px;
+    display: flex; align-items: center; justify-content: center;
+    font-weight: 800; color: white; font-size: 22px; letter-spacing: -1px;
+  }
+  .right-logo-text {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px; font-weight: 700; color: white; letter-spacing: 0.5px;
+  }
+  .right-logo-text span { color: var(--orange); }
+
+  .features { display: flex; flex-direction: column; gap: 16px; margin-bottom: auto; }
+  .feature {
+    display: flex; align-items: flex-start; gap: 14px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.07);
+    border-radius: 14px; padding: 16px;
+    transition: background 0.2s;
+  }
+  .feature:hover { background: rgba(255,255,255,0.09); }
+  .feature-icon {
+    width: 38px; height: 38px; min-width: 38px;
+    background: var(--orange); border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .feature-icon svg { width: 18px; height: 18px; color: white; }
+  .feature-title { font-size: 14px; font-weight: 700; color: white; margin-bottom: 3px; }
+  .feature-desc { font-size: 12px; color: rgba(255,255,255,0.5); line-height: 1.4; }
+
+  .right-cta {
+    margin-top: 28px;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 16px; padding: 20px;
+    text-align: center;
+  }
+  .right-cta p { font-size: 13px; color: rgba(255,255,255,0.55); margin-bottom: 4px; }
+  .right-cta h3 { font-size: 16px; font-weight: 800; color: white; margin-bottom: 14px; }
+  .right-cta a {
+    display: block; padding: 12px;
+    background: transparent; color: white;
+    border: 1.5px solid rgba(255,255,255,0.3);
+    border-radius: 10px; cursor: pointer;
+    font-family: 'Barlow', sans-serif; font-size: 12px;
+    font-weight: 800; letter-spacing: 1.5px; text-transform: uppercase;
+    text-decoration: none; transition: border-color 0.2s, background 0.2s;
+  }
+  .right-cta a:hover { border-color: white; background: rgba(255,255,255,0.08); }
+
+  /* Responsive */
+  @media (max-width: 700px) {
+    .right { display: none; }
+    .card { max-width: 480px; }
+    .left { padding: 36px 28px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="card">
+
+  <!-- LEFT: FORM -->
+  <div class="left">
+    <div class="logo">
+      <div class="logo-icon">⊗</div>
+      <div class="logo-text">Sale<span>Sphere</span></div>
+    </div>
+    <div class="tagline">Retail Billing &amp; Inventory</div>
+
+    <h1>Create your store</h1>
+    <p class="subtitle">Set up your SaleSphere account in seconds</p>
+
+    <!-- Step indicator -->
+    <div class="steps">
+      <div class="step-dot active" id="dot1"></div>
+      <div class="step-dot" id="dot2"></div>
+      <div class="step-dot" id="dot3"></div>
+      <span class="step-label" id="step-label">Step 1 of 3</span>
+    </div>
+
+    <!-- PAGE 1: Personal Info -->
+    <div class="form-page active" id="page1">
+      <div class="row">
+        <div class="field">
+          <label for="fname">First Name</label>
+          <div class="input-wrap">
+            <svg class="prefix" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <input type="text" id="fname" placeholder="First name">
+          </div>
+          <span class="field-error" id="fname-err"></span>
+        </div>
+        <div class="field">
+          <label for="lname">Last Name</label>
+          <div class="input-wrap">
+            <svg class="prefix" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+            <input type="text" id="lname" placeholder="Last name">
+          </div>
+          <span class="field-error" id="lname-err"></span>
+        </div>
+      </div>
+      <div class="field">
+        <label for="email">Email Address</label>
+        <div class="input-wrap">
+          <svg class="prefix" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 7L2 7"/></svg>
+          <input type="email" id="email" placeholder="you@example.com">
+        </div>
+        <span class="field-error" id="email-err"></span>
+      </div>
+      <div class="field">
+        <label for="phone">Mobile Number</label>
+        <div class="input-wrap">
+          <svg class="prefix" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="12" y1="18" x2="12.01" y2="18"/></svg>
+          <input type="tel" id="phone" placeholder="+91 98765 43210">
+        </div>
+        <span class="field-error" id="phone-err"></span>
+      </div>
+      <button class="btn-primary" onclick="goTo(2)">Continue →</button>
+      <div class="divider">or sign up with</div>
+      <div class="social-row">
+        <button class="social-btn">
+          <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+          Google
+        </button>
+        <button class="social-btn">
+          <svg viewBox="0 0 24 24"><path fill="#00A4EF" d="M2 3h9v9H2z"/><path fill="#FFB900" d="M13 3h9v9h-9z"/><path fill="#00B04F" d="M2 13h9v9H2z"/><path fill="#F65314" d="M13 13h9v9h-9z"/></svg>
+          Microsoft
+        </button>
+      </div>
+      <p class="signin-link">Already have an account? <a href="#">Sign in</a></p>
+    </div>
+
+    <!-- PAGE 2: Store Info -->
+    <div class="form-page" id="page2">
+      <div class="field">
+        <label for="storename">Store Name</label>
+        <div class="input-wrap">
+          <svg class="prefix" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+          <input type="text" id="storename" placeholder="My Retail Store">
+        </div>
+        <span class="field-error" id="storename-err"></span>
+      </div>
+      <div class="field">
+        <label for="gstin">GSTIN (optional)</label>
+        <div class="input-wrap">
+          <svg class="prefix" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 7V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v2"/></svg>
+          <input type="text" id="gstin" placeholder="22AAAAA0000A1Z5" style="text-transform:uppercase">
+        </div>
+      </div>
+      <div class="field">
+        <label for="category">Business Category</label>
+        <div class="input-wrap">
+          <svg class="prefix" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+          <select id="category">
+            <option value="" disabled selected>Select category</option>
+            <option>Grocery / Supermarket</option>
+            <option>Electronics &amp; Appliances</option>
+            <option>Clothing &amp; Fashion</option>
+            <option>Pharmacy / Medical</option>
+            <option>Restaurant / Food</option>
+            <option>Hardware / Tools</option>
+            <option>Books / Stationery</option>
+            <option>Other</option>
+          </select>
+        </div>
+        <span class="field-error" id="category-err"></span>
+      </div>
+      <div class="field">
+        <label for="city">City</label>
+        <div class="input-wrap">
+          <svg class="prefix" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+          <input type="text" id="city" placeholder="Chennai, Mumbai, Delhi…">
+        </div>
+        <span class="field-error" id="city-err"></span>
+      </div>
+      <div style="display:flex; gap:10px;">
+        <button class="btn-secondary" onclick="goTo(1)">← Back</button>
+        <button class="btn-primary" style="margin-top:0" onclick="goTo(3)">Continue →</button>
+      </div>
+    </div>
+
+    <!-- PAGE 3: Password -->
+    <div class="form-page" id="page3">
+      <div class="field">
+        <label for="pwd">Password</label>
+        <div class="input-wrap">
+          <svg class="prefix" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input type="password" id="pwd" placeholder="Min. 8 characters">
+          <svg class="suffix" id="pwd-toggle" onclick="togglePwd('pwd','pwd-toggle')" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <span class="field-error" id="pwd-err"></span>
+        <!-- Strength bar -->
+        <div style="display:flex; gap:4px; margin-top:6px;" id="strength-bars">
+          <div style="flex:1;height:3px;border-radius:2px;background:var(--input-border);transition:background 0.3s" id="sb1"></div>
+          <div style="flex:1;height:3px;border-radius:2px;background:var(--input-border);transition:background 0.3s" id="sb2"></div>
+          <div style="flex:1;height:3px;border-radius:2px;background:var(--input-border);transition:background 0.3s" id="sb3"></div>
+          <div style="flex:1;height:3px;border-radius:2px;background:var(--input-border);transition:background 0.3s" id="sb4"></div>
+        </div>
+      </div>
+      <div class="field">
+        <label for="cpwd">Confirm Password</label>
+        <div class="input-wrap">
+          <svg class="prefix" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <input type="password" id="cpwd" placeholder="Repeat password">
+          <svg class="suffix" id="cpwd-toggle" onclick="togglePwd('cpwd','cpwd-toggle')" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        </div>
+        <span class="field-error" id="cpwd-err"></span>
+      </div>
+      <div class="check-row">
+        <input type="checkbox" id="terms">
+        <label for="terms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a> of SaleSphere</label>
+      </div>
+      <span class="field-error" id="terms-err"></span>
+      <div style="display:flex; gap:10px;">
+        <button class="btn-secondary" onclick="goTo(2)">← Back</button>
+        <button class="btn-primary" style="margin-top:0" onclick="submit()">Create Account</button>
+      </div>
+    </div>
+
+    <!-- SUCCESS -->
+    <div class="success-screen" id="success">
+      <div class="success-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      <h2>Store Created! 🎉</h2>
+      <p>Your SaleSphere account is ready. Let's set up your first product and start billing smarter.</p>
+      <!-- <button class="btn-primary" style="max-width:240px">Go to Dashboard →</button> -->
+      <a href="{% url 'dashboard' %}" class="btn-primary" style="max-width:240px;text-decoration: none;">Go to Dashboard →</a>
+      <p class="signin-link">Check your email for a verification link.</p>
+    </div>
+
+  </div>
+
+  <!-- RIGHT: FEATURES PANEL -->
+  <div class="right">
+    <div class="right-logo">
+      <div class="right-logo-icon">⊗</div>
+      <div class="right-logo-text">Sale<span>Sphere</span></div>
+    </div>
+
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 7H6a2 2 0 0 0-2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2-2v-3"/><path d="M9 11h4"/><path d="M9 15h4"/><rect x="14" y="2" width="8" height="8" rx="1"/></svg>
+        </div>
+        <div>
+          <div class="feature-title">Smart Billing &amp; POS</div>
+          <div class="feature-desc">GST invoices, barcode scan &amp; fast checkout</div>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/><path d="M7 8h10M7 12h5"/></svg>
+        </div>
+        <div>
+          <div class="feature-title">Inventory Control</div>
+          <div class="feature-desc">Live stock, low-stock alerts &amp; reorder</div>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        </div>
+        <div>
+          <div class="feature-title">Sales Analytics</div>
+          <div class="feature-desc">Daily reports, trends &amp; profit insights</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="right-cta">
+      <p>Already have an account?</p>
+      <h3>Welcome back!</h3>
+      <a href="{% url 'index' %}">Sign in to SaleSphere</a>
+    </div>
+  </div>
+
+</div>
+
+<script>
+  let currentPage = 1;
+
+  function goTo(page) {
+    if (page > currentPage && !validatePage(currentPage)) return;
+
+    document.getElementById('page' + currentPage).classList.remove('active');
+    currentPage = page;
+    document.getElementById('page' + page).classList.add('active');
+    updateDots();
+  }
+
+  function updateDots() {
+    const labels = ['Step 1 of 3 — Personal Info', 'Step 2 of 3 — Store Details', 'Step 3 of 3 — Security'];
+    document.getElementById('step-label').textContent = labels[currentPage - 1];
+    for (let i = 1; i <= 3; i++) {
+      const d = document.getElementById('dot' + i);
+      d.className = 'step-dot';
+      if (i < currentPage) d.classList.add('done');
+      else if (i === currentPage) d.classList.add('active');
+    }
+  }
+
+  function validatePage(page) {
+    let ok = true;
+    const setErr = (id, msg) => {
+      const el = document.getElementById(id + '-err');
+      if (el) el.textContent = msg;
+      const inp = document.getElementById(id);
+      if (inp) inp.classList.toggle('has-error', !!msg);
+      if (msg) ok = false;
+    };
+    const clearAll = (...ids) => ids.forEach(id => setErr(id, ''));
+
+    if (page === 1) {
+      clearAll('fname','lname','email','phone');
+      if (!document.getElementById('fname').value.trim()) setErr('fname', 'First name is required');
+      if (!document.getElementById('lname').value.trim()) setErr('lname', 'Last name is required');
+      const em = document.getElementById('email').value.trim();
+      if (!em || !/^[^@]+@[^@]+\.[^@]+$/.test(em)) setErr('email', 'Enter a valid email address');
+      const ph = document.getElementById('phone').value.trim();
+      if (!ph) setErr('phone', 'Mobile number is required');
+    }
+    if (page === 2) {
+      clearAll('storename','category','city');
+      if (!document.getElementById('storename').value.trim()) setErr('storename', 'Store name is required');
+      if (!document.getElementById('category').value) setErr('category', 'Select a business category');
+      if (!document.getElementById('city').value.trim()) setErr('city', 'City is required');
+    }
+    return ok;
+  }
+
+  function submit() {
+    if (!validatePage(3)) return;
+    const pwd = document.getElementById('pwd').value;
+    const cpwd = document.getElementById('cpwd').value;
+    const terms = document.getElementById('terms').checked;
+    let ok = true;
+    const setErr = (id, msg) => {
+      document.getElementById(id + '-err').textContent = msg;
+      if (msg) ok = false;
+    };
+    setErr('pwd', pwd.length < 8 ? 'Password must be at least 8 characters' : '');
+    setErr('cpwd', pwd !== cpwd ? 'Passwords do not match' : '');
+    setErr('terms', !terms ? 'You must accept the terms' : '');
+    if (!ok) return;
+
+    document.getElementById('page3').classList.remove('active');
+    document.getElementById('success').classList.add('active');
+    // Hide step dots
+    document.querySelector('.steps').style.display = 'none';
+    document.querySelector('h1').textContent = 'You\'re all set!';
+    document.querySelector('.subtitle').textContent = '';
+  }
+
+  function togglePwd(inputId, toggleId) {
+    const inp = document.getElementById(inputId);
+    const toggle = document.getElementById(toggleId);
+    const isText = inp.type === 'text';
+    inp.type = isText ? 'password' : 'text';
+    toggle.innerHTML = isText
+      ? '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>'
+      : '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19m-6.72-1.07a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>';
+  }
+
+  // Password strength meter
+  document.getElementById('pwd').addEventListener('input', function() {
+    const v = this.value;
+    let score = 0;
+    if (v.length >= 8) score++;
+    if (/[A-Z]/.test(v)) score++;
+    if (/[0-9]/.test(v)) score++;
+    if (/[^A-Za-z0-9]/.test(v)) score++;
+    const colors = ['', '#ef4444', '#f97316', '#eab308', '#22c55e'];
+    for (let i = 1; i <= 4; i++) {
+      document.getElementById('sb' + i).style.background = i <= score ? colors[score] : 'var(--input-border)';
+    }
+  });
+
+  updateDots();
+</script>
+</body>
+</html>
