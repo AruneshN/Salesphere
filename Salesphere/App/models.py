@@ -34,13 +34,17 @@ class category(models.Model): #product category
     name=models.CharField(max_length=100)
     is_default=models.BooleanField(default=False)
 
+    # def __str__(self):
+    #     return self.name
+
+# Add product
 class Product(models.Model):
     TAX_CHOICES=[
-        ("0","'0%' Exempt"),
-        ("5","'5%' GST"),
-        ("12","'12%' GST"),
-        ("18","'18%' GST"),
-        ("28","'28%' GST"),
+        ("0","0% Exempt"),
+        ("5","5% GST"),
+        ("12","12% GST"),
+        ("18","18% GST"),
+        ("28","28% GST"),
     ]
 
     UNITS=[
@@ -53,20 +57,21 @@ class Product(models.Model):
 
     created_at=models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now=True)
-    Store=models.ForeignKey(Store,on_delete=models.CASCADE,related_name="Products")
+    store=models.ForeignKey(Store,on_delete=models.CASCADE,related_name="Products")
     product_name=models.CharField(null=False,blank=False,max_length=120)
     product_code=models.CharField(max_length=120)
     categories=models.ForeignKey(category,on_delete=models.SET_NULL,null=True,related_name="products")
     brand=models.CharField(max_length=120) #brand/manufacture
-    description=models.CharField(max_length=200)
+    description=models.TextField()
 
     # price and stock
     purchase_price=models.DecimalField(max_digits=12,decimal_places=2)
     selling_price=models.DecimalField(max_digits=12,decimal_places=2)
-    Tax=models.CharField(max_length=12,choices=TAX_CHOICES)
+    Tax=models.CharField(max_length=12,choices=TAX_CHOICES,default="18")
     opening_stock=models.DecimalField(max_digits=12,decimal_places=2)
     minimum_stock=models.DecimalField(max_digits=12,decimal_places=2)
-    units=models.CharField(max_length=120,choices=UNITS)
+    
+    units=models.CharField(max_length=120,choices=UNITS,default="PCS")
 
     def __str__(self):
         return self.product_name
@@ -90,7 +95,7 @@ class Customer(models.Model):
 
     created_at=models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now=True)
-    Store=models.ForeignKey(Store,on_delete=models.CASCADE,related_name="Customers")
+    store=models.ForeignKey(Store,on_delete=models.CASCADE,related_name="Customers")
 
     # contact details
     name=models.CharField(max_length=120,blank=False)
@@ -99,7 +104,7 @@ class Customer(models.Model):
     email=models.EmailField(max_length=120)
 
     # Address
-    address=models.CharField(max_length=150)
+    address=models.TextField()
     city=models.CharField(max_length=20)
     state=models.CharField(max_length=120)
     pincode=models.CharField(max_length=120)
@@ -127,7 +132,7 @@ class Bill(models.Model):
     
     created_at=models.DateTimeField(auto_now_add=True)
     updated_at=models.DateTimeField(auto_now=True)
-    Store=models.ForeignKey(Store,on_delete=models.CASCADE)
+    store=models.ForeignKey(Store,on_delete=models.CASCADE)
     Bill_num=models.CharField(max_length=30,unique=True)
     customer=models.ForeignKey(Customer,blank=False,on_delete=models.PROTECT,related_name="Bills")
     bill_date=models.DateField(default=timezone.now)
@@ -138,15 +143,15 @@ class Bill(models.Model):
     payment_method=models.CharField(max_length=30,choices=PAYMENT_METHODS)
 
     def __str__(self):
-        return f'BIll {self.Bill_num} - {self.Store}'
+        return f'BIll {self.Bill_num} - {self.store}'
 
 class Billitem(models.Model):
     TAX_CHOICES=[
-        ("0","'0%' Exempt"),
-        ("5","'5%' GST"),
-        ("12","'12%' GST"),
-        ("18","'18%' GST"),
-        ("28","'28%' GST"),
+        ("0","0% Exempt"),
+        ("5","5% GST"),
+        ("12","12% GST"),
+        ("18","18% GST"),
+        ("28","28% GST"),
     ]
     bill=models.ForeignKey(Bill,on_delete=models.CASCADE)
     product=models.ForeignKey(Product,on_delete=models.PROTECT)
@@ -157,20 +162,16 @@ class Billitem(models.Model):
     def __str__(self):
         return f'{self.product.product_name} x {self.quantity} '
     
-    # line subtotal
-    @property # not stored in db but we calcualt
-    def line_subtotal(self):
-        return self.quantity * self.unit_price
-    
-    # tax amount of the line item
     @property
-    def tax_amount(self):
-        rate=int(self.tax)/100
-        return self.line_subtotal*rate
-    
+    def subtotal(self):
+        return sum(item.line_subtotal for item in self.billitem_set.all())
+
     @property
-    def line_total(self):
-        """line total of the invoice"""
-        return self.line_subtotal + self.tax_amount
+    def total_tax(self):
+        return sum(item.tax_amount for item in self.billitem_set.all())
+
+    @property
+    def grand_total(self):
+        return self.subtotal + self.total_tax
 
 

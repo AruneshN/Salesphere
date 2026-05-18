@@ -185,7 +185,7 @@ select{cursor:pointer}
 /* LINE ITEMS */
 .line-table{width:100%;border-collapse:collapse}
 .line-table th{font-size:10px;text-transform:uppercase;letter-spacing:0.9px;color:var(--text-muted);font-weight:500;padding:0 6px 8px;text-align:left;border-bottom:1px solid var(--border)}
-.line-table td{padding:6px 4px;vertical-align:middle;border-bottom:1px solid var(--border)}
+.line-table td{padding:6px 4px;vertical-align:middle;border-bottom:1px solid var(--border);}
 .line-table tr:last-child td{border-bottom:none}
 .line-table input,.line-table select{padding:7px 9px;font-size:12px}
 .item-del{background:none;border:none;color:var(--text-light);cursor:pointer;font-size:15px;padding:4px 6px;border-radius:4px;transition:all 0.12s;line-height:1}
@@ -308,7 +308,7 @@ select{cursor:pointer}
     <div class="user-row">
       <div class="user-avatar">RS</div>
       <div>
-        <div class="user-name">Latha</div>
+        <div class="user-name">{{ request.user.first_name }} {{request.user.last_name}}</div>
         <div class="user-role">Administrator</div>
       </div>
     </div>
@@ -446,7 +446,7 @@ select{cursor:pointer}
       </div>
     </div>
   </div>
-
+<!-- ============================================================== ADD PRODUCT ================================================ -->
   <!-- ========== PAGE: ADD PRODUCT ========== -->
   <div class="page" id="p-products">
     <div class="sec-card">
@@ -461,23 +461,52 @@ select{cursor:pointer}
       </div>
 
       <div class="form-section-title">Basic Information</div>
-      <div class="form-grid form-grid-2">
-        <div class="form-group"><label class="lbl">Product Name</label><input type="text" placeholder="e.g. Wireless Mouse Pro"></div>
-        <div class="form-group"><label class="lbl">SKU / Product Code</label><input type="text" placeholder="e.g. WMP-001" style="font-family:var(--mono)"></div>
-        <div class="form-group"><label class="lbl">Category</label><select><option value="">Select category...</option><option>Electronics</option><option>Accessories</option><option>Peripherals</option><option>Storage</option><option>Networking</option><option>Other</option></select></div>
-        <div class="form-group"><label class="lbl">Brand / Manufacturer</label><input type="text" placeholder="e.g. Logitech"></div>
-        <div class="form-group full"><label class="lbl">Description</label><textarea placeholder="Product description, features, specifications..."></textarea></div>
+      <!-- form integration -->
+       <form action="{% url 'add-new-product' %}" method="POST" onkeydown="return event.key != 'Enter';">
+        {% csrf_token %}
+        <div class="form-grid form-grid-2">
+        <div class="form-group"><label class="lbl">Product Name</label><input type="text" placeholder="e.g. Wireless Mouse Pro" name="product_name"></div>
+        <div class="form-group"><label class="lbl">SKU / Product Code</label><input type="text" placeholder="e.g. WMP-001" style="font-family:var(--mono)" name="product_code" ></div>
+       <!-- category of the product -->
+    
+<!-- ================== -->
+ <div class="form-group"><label class="lbl">Category</label><select name="categories">
+          <option value="">Select category...</option>
+          {% for cat in productform.categories.field.queryset %}
+              <option value="{{ cat.id}}">{{cat.name}}</option>
+            {% endfor %}
+        </select>
+      </div>
+
+
+        <div class="form-group"><label class="lbl">Brand / Manufacturer</label><input type="text" placeholder="e.g. Logitech" name="brand"></div>
+        <div class="form-group full"><label class="lbl">Description</label><textarea placeholder="Product description, features, specifications..." name="description"></textarea></div>
       </div>
 
       <hr class="divider">
       <div class="form-section-title">Pricing & Stock</div>
       <div class="form-grid form-grid-3">
-        <div class="form-group"><label class="lbl">Purchase Price (₹)</label><div class="input-prefix"><span class="pfx">₹</span><input type="number" placeholder="0.00"></div></div>
-        <div class="form-group"><label class="lbl">Selling Price (₹)</label><div class="input-prefix"><span class="pfx">₹</span><input type="number" placeholder="0.00"></div></div>
-        <div class="form-group"><label class="lbl">Tax / GST</label><select><option>0% Exempt</option><option>5% GST</option><option selected>12% GST</option><option>18% GST</option><option>28% GST</option></select></div>
-        <div class="form-group"><label class="lbl">Opening Stock</label><input type="number" placeholder="0"></div>
-        <div class="form-group"><label class="lbl">Min Stock Level</label><input type="number" placeholder="10"></div>
-        <div class="form-group"><label class="lbl">Unit</label><select><option>Pieces (pcs)</option><option>Kilograms (kg)</option><option>Litres (L)</option><option>Box</option><option>Pack</option></select></div>
+        <div class="form-group"><label class="lbl">Purchase Price (₹)</label><div class="input-prefix"><span class="pfx">₹</span><input type="number" placeholder="0.00" name="purchase_price"></div></div>
+        <div class="form-group"><label class="lbl">Selling Price (₹)</label><div class="input-prefix"><span class="pfx">₹</span><input type="number" placeholder="0.00" name="selling_price"></div></div>
+        
+        <!-- tac -->
+        <div class="form-group"><label class="lbl">Tax / GST</label>
+          <select name="Tax">
+            <option value=""> Select Tax...</option>
+            {% for value,label in productform.Tax.field.choices %}
+            <option value="{{ value }}">{{ label }}</option>
+            {% endfor %}
+          </select></div>
+        <div class="form-group"><label class="lbl">Opening Stock</label><input type="number" placeholder="0" name="opening_stock"></div>
+        <div class="form-group"><label class="lbl">Min Stock Level</label><input type="number" placeholder="10" name="minimum_stock"></div>
+        <!-- <div class="form-group"><label class="lbl">Unit</label><select name="units"><option>Pieces (pcs)</option><option>Kilograms (kg)</option><option>Litres (L)</option><option>Box</option><option>Pack</option></select></div> -->
+          
+        <div class="form-group"><label class="lbl">Unit</label><select name="units">
+          <option value="">Select Units...</option>
+          {% for value,label in productform.units.field.choices %}
+            <option value="{{value}}">{{label}}</option>
+          {% endfor %}
+        </select></div>
       </div>
 
       <hr class="divider">
@@ -497,11 +526,13 @@ select{cursor:pointer}
 
       <div class="form-actions">
         <button class="btn btn-ghost" onclick="toast('🗑️ Form cleared')">Clear</button>
-        <button class="btn btn-primary" onclick="toast('✅ Product added successfully!')">📦 Add Product</button>
+        <button class="btn btn-primary" onclick="toast('✅ Product added successfully!')" type="submit">📦 Add Product</button>
       </div>
     </div>
+  </form>
   </div>
-
+ 
+      
   <!-- ========== PAGE: CREATE BILL ========== -->
   <div class="page" id="p-bills">
     <!-- Stats row -->
@@ -511,7 +542,6 @@ select{cursor:pointer}
       <div class="stat-mini"><div class="stat-mini-label">Collected</div><div class="stat-mini-value">₹9,210</div><div class="stat-mini-sub" style="color:var(--text-muted)">74% collection rate</div></div>
       <div class="stat-mini"><div class="stat-mini-label">Pending</div><div class="stat-mini-value" style="color:var(--warning)">₹3,240</div><div class="stat-mini-sub down">2 bills unpaid</div></div>
     </div>
-
     <div class="sec-card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
         <div style="display:flex;align-items:center;gap:12px">
@@ -520,62 +550,89 @@ select{cursor:pointer}
           </div>
           <div><div style="font-size:15px;font-weight:600">Create New Bill</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px">Generate invoice for customer purchases</div></div>
         </div>
-        <span style="background:#f0fdf4;color:#16a34a;font-size:11px;font-weight:600;padding:4px 11px;border-radius:20px;font-family:var(--mono)">Bill #SS-1032</span>
+          <span style="background:#f0fdf4;color:#16a34a;font-size:11px;font-weight:600;padding:4px 11px;border-radius:20px;font-family:var(--mono)">{{ billform.Bill_num }}</span>
       </div>
 
+      <!-- create bill form -->
+   <form action="{% url 'create-bill' %}" method="POST" onkeydown="return event.key != 'Enter';">
+    {% csrf_token %}
       <div class="form-grid form-grid-3">
-        <div class="form-group"><label class="lbl">Customer</label><select><option value="">Select customer...</option><option>Ravi Kumar</option><option>Meena Textiles</option><option>Anand Stores</option><option>Priya Enterprises</option></select></div>
-        <div class="form-group"><label class="lbl">Bill Date</label><input type="date" value="2025-05-06"></div>
-        <div class="form-group"><label class="lbl">Due Date</label><input type="date" value="2025-05-20"></div>
+        <div class="form-group"><label class="lbl">Customer</label>
+          <select name="customer">
+            <option value="">Select customer...</option>
+            {% for customer in billform.customer.field.queryset %}
+                <option value="{{ customer.id }}">{{ customer.name }}</option>
+            {% endfor %}
+
+          </select>
+        </div>
+        <div class="form-group"><label class="lbl">Bill Date</label><input type="date" value="2025-05-06" name="bill_date"></div>
+        <div class="form-group"><label class="lbl">Due Date</label><input type="date" value="2025-05-20" name="due_date"></div>
       </div>
 
       <hr class="divider">
       <div class="form-section-title">Line Items</div>
       <div style="overflow-x:auto">
         <table class="line-table" id="lineTable">
-          <thead><tr><th style="width:35%">Product</th><th style="width:11%">Qty</th><th style="width:16%">Unit Price (₹)</th><th style="width:12%">Tax</th><th style="width:16%">Amount (₹)</th><th style="width:5%"></th></tr></thead>
-          <tbody id="lineBody">
-            <tr>
-              <td><input type="text" value="LED Bulb 9W Pack"></td>
-              <td><input type="number" value="5" min="1" oninput="calcRow(this)"></td>
-              <td><input type="number" value="280" oninput="calcRow(this)"></td>
-              <td><select onchange="calcRow(this)"><option value="0">0%</option><option value="5">5%</option><option value="12" selected>12%</option><option value="18">18%</option></select></td>
-              <td><input type="number" value="1568" readonly style="background:#f0eeea;font-weight:600"></td>
-              <td><button class="item-del" onclick="delRow(this)">✕</button></td>
-            </tr>
-            <tr>
-              <td><input type="text" value="USB-C Cable 2m"></td>
-              <td><input type="number" value="3" min="1" oninput="calcRow(this)"></td>
-              <td><input type="number" value="450" oninput="calcRow(this)"></td>
-              <td><select onchange="calcRow(this)"><option value="0">0%</option><option value="5">5%</option><option value="12">12%</option><option value="18" selected>18%</option></select></td>
-              <td><input type="number" value="1593" readonly style="background:#f0eeea;font-weight:600"></td>
-              <td><button class="item-del" onclick="delRow(this)">✕</button></td>
-            </tr>
-          </tbody>
+          <thead>
+            <tr><th style="width:35%">Product</th>
+              <th style="width:11%">Qty</th>
+              <th style="width:16%">Unit Price (₹)</th>
+              <th style="width:12%">Tax</th>
+              <th style="width:16%">Amount (₹)</th>
+              <th style="width:5%"></th></tr>
+            </thead>
+         <tbody id="lineBody">
+  <tr>
+    <td style="position:relative">
+      <input type="text" class="product-search" placeholder="Search product..." autocomplete="off">
+      <input type="hidden" class="product-id" name="product">
+    </td>
+    <td><input type="number" placeholder="Qty" min="1" oninput="calcRow(this)" name="quantity"></td>
+    <td><input type="number" placeholder="Price" oninput="calcRow(this)" name="unit_price"></td>
+    <td>
+      <select onchange="calcRow(this)" name="tax">
+        {% for value,label in billitemform.tax.field.choices %}
+        <option value="{{value}}">{{label}}</option>
+        {% endfor %}
+      </select>
+    </td>
+    <td><input type="number" value="0" readonly style="background:#f0eeea;font-weight:600"></td>
+    <td><button type="button" class="item-del" onclick="delRow(this)">✕</button></td>
+  </tr>
+</tbody>
         </table>
       </div>
-      <button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="addRow()">+ Add Item</button>
+      <button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="addRow()" type="button">+ Add Item</button>
 
       <hr class="divider">
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start">
         <div>
           <div class="form-section-title">Notes & Payment</div>
-          <textarea placeholder="Payment terms, special instructions..." style="margin-bottom:12px"></textarea>
-          <div class="form-group"><label class="lbl">Payment Method</label><select><option>Cash</option><option>UPI</option><option>Bank Transfer</option><option>Cheque</option><option>Credit (Pay Later)</option></select></div>
+          <textarea placeholder="Payment terms, special instructions..." style="margin-bottom:12px" name="notes"></textarea>
+          <div class="form-group"><label class="lbl">Payment Method</label>
+            <select name="payment_method">
+              {% for value,label in billform.payment_method.field.choices %}
+                 <option value="{{ value }}">{{ label }}</option>
+             {% endfor %}
+            </select>
+          </div>
         </div>
-        <div class="bill-summary">
-          <div class="bsum-row"><span>Subtotal</span><span style="font-family:var(--mono)">₹2,750.00</span></div>
-          <div class="bsum-row"><span>Tax (GST)</span><span style="font-family:var(--mono)">₹411.00</span></div>
-          <div class="bsum-row"><span>Discount</span><span style="color:var(--success);font-family:var(--mono)">– ₹0.00</span></div>
-          <div class="bsum-row total"><span>Total Amount</span><span style="font-family:var(--mono)">₹3,161.00</span></div>
+      <div class="bill-summary">
+            <div class="bsum-row"><span>Subtotal</span><span id="subtotal">₹0.00</span></div>
+            <div class="bsum-row"><span>Tax</span><span id="taxTotal">₹0.00</span></div>
+            <div class="bsum-row"><span>Discount</span><span id="discountShow">₹0.00</span></div>
+            <div class="bsum-row total"><span>Total Amount</span><span id="grandTotal">₹0.00</span></div>
         </div>
       </div>
 
       <div class="form-actions">
-        <button class="btn btn-ghost" onclick="toast('📋 Saved as draft')">Save Draft</button>
-        <button class="btn btn-ghost" onclick="toast('👁️ Preview generated')">Preview</button>
-        <button class="btn btn-primary" onclick="toast('✅ Bill #SS-1032 created!')">🧾 Create Bill</button>
+        <button class="btn btn-ghost" onclick="toast('📋 Saved as draft')" type="button">Save Draft</button>
+        <button class="btn btn-ghost" onclick="toast('👁️ Preview generated')" type="button">Preview</button>
+        <button class="btn btn-primary" onclick="toast('✅ Bill #SS-1032 created!')" type="submit">🧾 Create Bill</button>
       </div>
+        </form>
+
     </div>
 
     <!-- Recent bills table -->
@@ -617,30 +674,50 @@ select{cursor:pointer}
       </div>
 
       <div class="form-section-title">Contact Details</div>
+      <!-- form of add customer -->
+      <form action="{% url 'add-customer' %}" method="POST">
+        {% csrf_token %}
       <div class="form-grid form-grid-2">
-        <div class="form-group"><label class="lbl">Full Name / Business Name</label><input type="text" placeholder="e.g. Ravi Kumar / Kumar Traders"></div>
-        <div class="form-group"><label class="lbl">Customer Type</label><select><option>Individual</option><option>Business / Firm</option><option>Wholesale</option><option>Retailer</option></select></div>
-        <div class="form-group"><label class="lbl">Phone Number</label><input type="tel" placeholder="+91 98765 43210"></div>
-        <div class="form-group"><label class="lbl">Email Address</label><input type="email" placeholder="customer@email.com"></div>
+        <div class="form-group"><label class="lbl">Full Name / Business Name</label>
+          <input type="text" placeholder="e.g. Ravi Kumar / Kumar Traders" name="name">
+        </div>
+        <div class="form-group"><label class="lbl">Customer Type</label>
+          <select name="customer_type">
+          {% for value,label in customerform.customer_type.field.choices %}
+                  <option value="{{value}}">{{label}}</option>
+             {% endfor %}
+          </select>
+        </div>
+        <div class="form-group"><label class="lbl">Phone Number</label><input type="tel" placeholder="+919876543210" name="phone_number"></div>
+        <div class="form-group"><label class="lbl">Email Address</label><input type="email" placeholder="customer@email.com" name="email"></div>
       </div>
 
       <hr class="divider">
       <div class="form-section-title">Address</div>
       <div class="form-grid form-grid-2">
-        <div class="form-group full"><label class="lbl">Street Address</label><textarea placeholder="Building, street, area..." style="min-height:58px"></textarea></div>
-        <div class="form-group"><label class="lbl">City</label><input type="text" placeholder="e.g. Tiruchirappalli"></div>
-        <div class="form-group"><label class="lbl">State</label><select><option>Tamil Nadu</option><option>Karnataka</option><option>Kerala</option><option>Andhra Pradesh</option><option>Maharashtra</option><option>Delhi</option></select></div>
-        <div class="form-group"><label class="lbl">PIN Code</label><input type="text" placeholder="620001" maxlength="6"></div>
-        <div class="form-group"><label class="lbl">Country</label><input type="text" value="India" readonly style="color:var(--text-muted)"></div>
+        <div class="form-group full"><label class="lbl">Street Address</label><textarea placeholder="Building, street, area..." style="min-height:58px" name="address"></textarea></div>
+        <div class="form-group"><label class="lbl">City</label><input type="text" placeholder="e.g. Tiruchirappalli" name="city"></div>
+        <!-- <div class="form-group"><label class="lbl">State</label><select><option>Tamil Nadu</option><option>Karnataka</option><option>Kerala</option><option>Andhra Pradesh</option><option>Maharashtra</option><option>Delhi</option></select></div> -->
+          <div class="form-group"><label class="lbl">City</label><input type="text" placeholder="e.g. Tamil Nadu" name="state"></div>
+
+        <div class="form-group"><label class="lbl">PIN Code</label><input type="text" placeholder="620001" maxlength="6" name="pincode"></div>
+        <div class="form-group"><label class="lbl">Country</label><input type="text" placeholder="e.g India" style="color:var(--text-muted)" name="country"></div>
       </div>
 
       <hr class="divider">
       <div class="form-section-title">Business & Tax Info</div>
       <div class="form-grid form-grid-2">
-        <div class="form-group"><label class="lbl">GSTIN</label><input type="text" placeholder="22AAAAA0000A1Z5" maxlength="15" style="font-family:var(--mono);letter-spacing:0.05em"></div>
-        <div class="form-group"><label class="lbl">PAN Number</label><input type="text" placeholder="AAAAA1234A" maxlength="10" style="font-family:var(--mono);letter-spacing:0.05em"></div>
-        <div class="form-group"><label class="lbl">Credit Limit (₹)</label><div class="input-prefix"><span class="pfx">₹</span><input type="number" placeholder="0"></div></div>
-        <div class="form-group"><label class="lbl">Payment Terms</label><select><option>Immediate</option><option>Net 7 days</option><option>Net 15 days</option><option>Net 30 days</option></select></div>
+        <div class="form-group"><label class="lbl">GSTIN</label><input type="text" placeholder="22AAAAA0000A1Z5" maxlength="15" style="font-family:var(--mono);letter-spacing:0.05em" name="gstin"></div>
+        <div class="form-group"><label class="lbl">PAN Number</label><input type="text" placeholder="AAAAA1234A" maxlength="10" style="font-family:var(--mono);letter-spacing:0.05em" name="pan_number"></div>
+        <div class="form-group"><label class="lbl">Credit Limit (₹)</label><div class="input-prefix"><span class="pfx">₹</span><input type="number" placeholder="0" name="credit_limit"></div></div>
+        <div class="form-group"><label class="lbl">Payment Terms</label>
+          <select name="payment_term">
+            {% for value,label in customerform.payment_term.field.choices %}
+            <option value="{{value}}">{{label}}</option>
+              {% endfor %}
+          </select>
+        </div>
+        
       </div>
 
       <hr class="divider">
@@ -651,10 +728,12 @@ select{cursor:pointer}
 
       <div class="form-actions">
         <button class="btn btn-ghost">Clear</button>
-        <button class="btn btn-primary" onclick="toast('✅ Customer added successfully!')">👤 Add Customer</button>
+        <button class="btn btn-primary" onclick="toast('✅ Customer added successfully!')" type="submit">👤 Add Customer</button>
       </div>
+         </form>
     </div>
   </div>
+  
 
   <!-- ========== PAGE: INVENTORY / STOCK ALERTS ========== -->
   <div class="page" id="p-inventory">
@@ -728,6 +807,20 @@ select{cursor:pointer}
   </div>
 
 </div><!-- /main -->
+<div id="globalDropdown" style="
+  position:fixed;
+  background:white;
+  border:1px solid #ddd;
+  border-radius:8px;
+  max-height:200px;
+  overflow-y:auto;
+  display:none;
+  z-index:99999;
+  box-shadow:0 4px 12px rgba(0,0,0,0.15);
+  min-width:200px;
+"></div>
+
+<!-- <div id="toast"></div> -->
 
 <div id="toast"></div>
 
@@ -744,6 +837,92 @@ const pageMeta = {
   settings:   {title:'Settings',             sub:'System configuration'},
 };
 
+// ---- PRODUCTS DATA FROM DB ----
+const allProducts = [
+  {% for product in billitemform.product.field.queryset %}
+  {
+    id: {{ product.id }},
+    name: "{{ product.product_name|escapejs }}",
+    price: "{{ product.selling_price|escapejs }}",
+    tax: "{{ product.Tax|escapejs }}"
+  },
+  {% endfor %}
+];
+
+// ---- SEARCH FILTER ----
+
+const globalDropdown = document.getElementById('globalDropdown');
+let activeInput = null;
+let activeRow = null;
+
+function attachSearch(row) {
+  if (row.dataset.searchAttached) return;
+  row.dataset.searchAttached = 'true';
+
+  const searchInput = row.querySelector('.product-search');
+  const productId   = row.querySelector('.product-id');
+  if (!searchInput) return;
+
+  searchInput.addEventListener('input', function() {
+    activeInput = searchInput;
+    activeRow   = row;
+
+    const query = this.value.toLowerCase().trim();
+    globalDropdown.innerHTML = '';
+
+    if (query.length === 0) { 
+      globalDropdown.style.display = 'none'; 
+      return; 
+    }
+
+    const filtered = allProducts.filter(p => p.name.toLowerCase().includes(query));
+
+    if (filtered.length === 0) {
+      globalDropdown.innerHTML = '<div style="padding:10px;color:#888">No products found</div>';
+    } else {
+      filtered.forEach(product => {
+        const item = document.createElement('div');
+        item.style.cssText = 'padding:10px 12px;cursor:pointer;border-bottom:1px solid #f0f0f0;font-size:13px';
+        item.textContent = product.name;
+        item.addEventListener('mouseover', () => item.style.background = '#f5f5f5');
+        item.addEventListener('mouseout',  () => item.style.background = 'white');
+        item.addEventListener('mousedown', function(e) {
+          e.preventDefault();
+          searchInput.value = product.name;
+          productId.value   = product.id;
+          globalDropdown.style.display = 'none';
+          const inputs = row.querySelectorAll('input[type="number"]');
+          if (inputs[1]) inputs[1].value = product.price;
+          const taxSelect = row.querySelector('select');
+          if (taxSelect) taxSelect.value = product.tax;
+          if (inputs[0]) calcRow(inputs[0]);
+        });
+        globalDropdown.appendChild(item);
+      });
+    }
+
+    //  position dropdown at input location
+    const rect = searchInput.getBoundingClientRect();
+    globalDropdown.style.top   = rect.bottom + window.scrollY + 'px';
+    globalDropdown.style.left  = rect.left + 'px';
+    globalDropdown.style.width = rect.width + 'px';
+    globalDropdown.style.display = 'block';
+  });
+
+  searchInput.addEventListener('blur', function() {
+    setTimeout(() => globalDropdown.style.display = 'none', 200);
+  });
+}
+
+// close on outside click
+document.addEventListener('mousedown', function(e) {
+  if (e.target !== globalDropdown && !globalDropdown.contains(e.target)) {
+    if (activeInput && e.target !== activeInput) {
+      globalDropdown.style.display = 'none';
+    }
+  }
+});
+
 function navigate(id, navEl) {
   // hide all pages
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -759,8 +938,14 @@ function navigate(id, navEl) {
 
   // re-init chart if going to dashboard
   if (id === 'dashboard') setTimeout(initChart, 50);
-}
 
+    // ✅ attach search when bills page opens
+  if (id === 'bills') {
+    setTimeout(() => {
+      document.querySelectorAll('#lineBody tr').forEach(row => attachSearch(row));
+    }, 50);  
+}
+}
 // ---- TOAST ----
 let toastTimer;
 function toast(msg) {
@@ -807,26 +992,76 @@ function calcRow(el) {
   const qty = parseFloat(row.cells[1].querySelector('input').value)||0;
   const price = parseFloat(row.cells[2].querySelector('input').value)||0;
   const tax = parseFloat(row.cells[3].querySelector('select').value)||0;
-  row.cells[4].querySelector('input').value = Math.round(qty * price * (1 + tax/100));
+  
+  const base= qty*price;
+  const taxAmt= base *(tax/100);
+  
+  // row.cells[4].querySelector('input').value = Math.round(qty * price * (1 + tax/100));
+  row.cells[4].querySelector('input').value = Math.round(base + taxAmt);
+  updateBillTotal();
+
+}
+
+function updateBillTotal() {
+  let subtotal = 0;
+  let taxTotal = 0;
+
+  const rows = document.querySelectorAll('#lineBody tr');
+
+  rows.forEach(row => {
+    const qty = parseFloat(row.cells[1].querySelector('input').value) || 0;
+    const price = parseFloat(row.cells[2].querySelector('input').value) || 0;
+    const tax = parseFloat(row.cells[3].querySelector('select').value) || 0;
+
+    const base = qty * price;
+    const taxAmt = base * (tax / 100);
+
+    subtotal += base;
+    taxTotal += taxAmt;
+  });
+
+  const discount = parseFloat(document.getElementById('discount')?.value) || 0;
+
+  const total = subtotal + taxTotal - discount;
+
+  document.getElementById('subtotal').textContent = "₹" + subtotal.toFixed(2);
+  document.getElementById('taxTotal').textContent = "₹" + taxTotal.toFixed(2);
+  document.getElementById('discountShow').textContent = "₹" + discount.toFixed(2);
+  document.getElementById('grandTotal').textContent = "₹" + total.toFixed(2);
 }
 function delRow(btn) {
   const tbody = document.getElementById('lineBody');
   if (tbody.rows.length > 1) { btn.closest('tr').remove(); toast('🗑️ Item removed'); }
   else toast('⚠️ At least one item required');
 }
+
 function addRow() {
   const tbody = document.getElementById('lineBody');
   const tr = document.createElement('tr');
   tr.innerHTML = `
-    <td><input type="text" placeholder="Search product..."></td>
-    <td><input type="number" value="1" min="1" oninput="calcRow(this)"></td>
-    <td><input type="number" value="0" oninput="calcRow(this)"></td>
-    <td><select onchange="calcRow(this)"><option value="0">0%</option><option value="5">5%</option><option value="12" selected>12%</option><option value="18">18%</option></select></td>
+    <td style="position:relative">
+      <input type="text" class="product-search" placeholder="Search product..." autocomplete="off">
+      <input type="hidden" class="product-id" name="product">
+      <div class="product-dropdown" style="position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #ddd;border-radius:8px;
+      max-height:180px;overflow-y:auto;display:none;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,0.1)"></div>
+    </td>
+    <td><input type="number" placeholder="Qty" min="1" oninput="calcRow(this)"></td>
+    <td><input type="number" placeholder="Price" oninput="calcRow(this)"></td>
+    <td><select onchange="calcRow(this)">
+      <option value="0">0%</option>
+      <option value="5">5%</option>
+      <option value="12" selected>12%</option>
+      <option value="18">18%</option>
+      <option value="28">28%</option>
+    </select></td>
     <td><input type="number" value="0" readonly style="background:#f0eeea;font-weight:600"></td>
-    <td><button class="item-del" onclick="delRow(this)">✕</button></td>`;
+    <td><button type="button" class="item-del" onclick="delRow(this)">✕</button></td>
+  `;
   tbody.appendChild(tr);
-  tr.querySelector('input').focus();
+  attachSearch(tr);
+  tr.querySelector('.product-search').focus();
 }
+
 
 // ---- FILTER CHIPS ----
 function filterChip(btn) {

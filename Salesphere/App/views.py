@@ -4,7 +4,11 @@ from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import authenticate,login,logout
 from . import forms
-from .forms import Registeruser,Userstore
+from .forms import Registeruser,Userstore,Productform,Customerform,Billform,Billitemform
+from .models import Bill,Product
+from django.db.models import F
+from datetime import date
+
 # Create your views here.
 
 # index page
@@ -60,3 +64,107 @@ class dashboard(LoginRequiredMixin,TemplateView):
     template_name="dashboard.html"
     login_url='/'
 
+class add_product(LoginRequiredMixin,TemplateView):
+    template_name="dashboard.html"
+    login_url='/'
+
+    def get(self,request,*args,**kwargs):
+        productform=Productform()
+        return render(request,self.template_name,context={
+            "productform":productform
+        })
+
+    def post(self,request,*args,**kwargs):
+        productform=Productform(request.POST)
+        if productform.is_valid():
+            product=productform.save(commit=False)
+            product.store=request.user.store
+            product.save()
+            return render(request,self.template_name,context={
+                "productform":Productform()
+            })
+        return render(request,self.template_name,context={
+            "productform":productform,
+        })
+
+class add_customer(LoginRequiredMixin,TemplateView):
+    template_name="dashboard.html"
+    login_url='/'
+
+    def get(self,request,*args,**kwargs):
+        customerform=Customerform()
+        return render(request,self.template_name,context={
+            'customerform':customerform
+        })
+    def post(self,request,*args,**kwargs):
+        customerform=Customerform(request.POST)
+        if customerform.is_valid():
+            customer=customerform.save(commit=False)
+            customer.store=request.user.store
+            customer.save()
+            return render(request,self.template_name,context={
+                "customerform":Customerform()
+            })
+        return render(request,self.template_name,context={
+                "customerform":customerform
+            })
+
+# bill creation
+def get_financial_year():
+    today = date.today()
+    if today.month >= 4:
+        return f"{today.year}-{str(today.year + 1)[2:]}"
+    else:
+        return f"{today.year - 1}-{str(today.year)[2:]}"
+
+def generate_bill_number(store):
+    fy = get_financial_year()
+    count = Bill.objects.filter(
+        store=store,
+        Bill_num__startswith=f"INV-{fy}"
+    ).count() + 1
+    return f"INV-{fy}/{count:04d}"
+
+
+class createbill(LoginRequiredMixin, TemplateView):
+    template_name = "dashboard.html"
+    login_url = '/'
+    def post(self, request, *args, **kwargs):
+        billform = Billform(request.POST)
+        billitemform = Billitemform(request.POST)
+        
+        # print("POST DATA:", request.POST)
+        # print("BILL VALID:", billform.is_valid())
+        # print("BILL ERRORS:", billform.errors)
+        # print("ITEM VALID:", billitemform.is_valid())
+        # print("ITEM ERRORS:", billitemform.errors)
+
+        if billform.is_valid() and billitemform.is_valid():
+            bill = billform.save(commit=False)
+            bill.store = request.user.store
+            bill.Bill_num = generate_bill_number(request.user.store)
+            bill.save()
+            print("BILL SAVED:", bill.id, bill.Bill_num)
+
+            billitem = billitemform.save(commit=False)
+            billitem.bill = bill
+            billitem.save()
+            print("ITEM SAVED:", billitem.id)
+            return redirect('dashboard')
+
+        print("VALIDATION FAILED")
+        return render(request, self.template_name, {
+            "billform": billform,
+            "billitemform": billitemform
+        })
+    
+
+
+class stock_alert(LoginRequiredMixin,TemplateView):
+    template_name="dashboard.html"
+    login_url='/'
+    def get(self,request,*args,**kwargs):
+        store=request.user.store
+        low_stock=Product.objects.filter(store=store,opening_stock__lte=F("minimum_stock"))
+        out_of_stock=low_stock.filter(opening_stock=0)
+        return HttpResponse(out_of_stock)
