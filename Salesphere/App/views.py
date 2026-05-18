@@ -158,13 +158,14 @@ class createbill(LoginRequiredMixin, TemplateView):
             "billitemform": billitemform
         })
     
-
+# ======================================= stock alert
 
 class stock_alert(LoginRequiredMixin,TemplateView):
     template_name="dashboard.html"
     login_url='/'
     def get(self,request,*args,**kwargs):
         store=request.user.store
-        low_stock=Product.objects.filter(store=store,opening_stock__lte=F("minimum_stock"))
+        low_stock=Product.objects.filter(store=store,current_stock__lte=F("minimum_stock"))
         out_of_stock=low_stock.filter(opening_stock=0)
+        warning_stock=low_stock.filter(current_stock__gt=5)
         return HttpResponse(out_of_stock)
