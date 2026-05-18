@@ -70,7 +70,7 @@ class Product(models.Model):
     Tax=models.CharField(max_length=12,choices=TAX_CHOICES,default="18")
     opening_stock=models.DecimalField(max_digits=12,decimal_places=2)
     minimum_stock=models.DecimalField(max_digits=12,decimal_places=2)
-    
+    current_stock=models.DecimalField(max_digits=12,decimal_places=2,default=0)
     units=models.CharField(max_length=120,choices=UNITS,default="PCS")
 
     def __str__(self):
