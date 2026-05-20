@@ -70,7 +70,7 @@ class Product(models.Model):
     Tax=models.CharField(max_length=12,choices=TAX_CHOICES,default="18")
     opening_stock=models.DecimalField(max_digits=12,decimal_places=2)
     minimum_stock=models.DecimalField(max_digits=12,decimal_places=2)
-    current_stock=models.DecimalField(max_digits=12,decimal_places=2,default=0)
+    current_stock=models.DecimalField(max_digits=12,decimal_places=2)
     units=models.CharField(max_length=120,choices=UNITS,default="PCS")
 
     def __str__(self):
@@ -155,12 +155,19 @@ class Billitem(models.Model):
     ]
     bill=models.ForeignKey(Bill,on_delete=models.CASCADE)
     product=models.ForeignKey(Product,on_delete=models.PROTECT)
+    #product name
+    product_name=models.CharField(max_length=120,blank=True) 
     quantity=models.DecimalField(max_digits=12,decimal_places=2)
     unit_price=models.DecimalField(max_digits=12,decimal_places=2)
     tax=models.CharField(max_length=12,choices=TAX_CHOICES)
 
     def __str__(self):
         return f'{self.product.product_name} x {self.quantity} '
+    
+    def save(self,*args,**kwargs):
+        if self.product:
+            self.product_name=self.product.product_name
+        super().save(*args,**kwargs)
     
     @property
     def subtotal(self):
