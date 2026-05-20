@@ -165,7 +165,20 @@ class stock_alert(LoginRequiredMixin,TemplateView):
     login_url='/'
     def get(self,request,*args,**kwargs):
         store=request.user.store
-        low_stock=Product.objects.filter(store=store,current_stock__lte=F("minimum_stock"))
-        out_of_stock=low_stock.filter(opening_stock=0)
-        warning_stock=low_stock.filter(current_stock__gt=5)
-        return HttpResponse(out_of_stock)
+        
+        # out_of_stock - current stock is 0
+        out_of_stock=Product.objects.filter(store=store,current_stock=0)
+
+        #warning stock current stock is +5 than minimum stock
+        warning_stock=Product.objects.filter(store=store,current_stock__gt=F("minimum_stock"),current_stock__lte=F("minimum_stock")+5)
+
+        #low stock
+        low_stock=Product.objects.filter(store=store,current_stock__gt=0,current_stock__lte=F("minimum_stock"))
+
+        return render(request,self.template_name,context={
+                "out_of_stock":out_of_stock,
+                "warning_stock":warning_stock,
+                "low_stock":low_stock
+            }
+        )
+        
