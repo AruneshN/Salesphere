@@ -71,6 +71,7 @@ class add_product(LoginRequiredMixin,TemplateView):
     def get(self,request,*args,**kwargs):
         productform=Productform()
         return render(request,self.template_name,context={
+            "active_page":'dashboard',
             "productform":productform
         })
 
@@ -94,6 +95,7 @@ class add_customer(LoginRequiredMixin,TemplateView):
     def get(self,request,*args,**kwargs):
         customerform=Customerform()
         return render(request,self.template_name,context={
+            'active_page':'products',
             'customerform':customerform
         })
     def post(self,request,*args,**kwargs):
@@ -129,6 +131,10 @@ def generate_bill_number(store):
 class createbill(LoginRequiredMixin, TemplateView):
     template_name = "dashboard.html"
     login_url = '/'
+    def get(self, request):
+        return render(request, 'template.html', {
+            'active_page': 'bills',
+        })
     def post(self, request, *args, **kwargs):
         billform = Billform(request.POST)
         billitemform = Billitemform(request.POST)
@@ -168,17 +174,33 @@ class stock_alert(LoginRequiredMixin,TemplateView):
         
         # out_of_stock - current stock is 0
         out_of_stock=Product.objects.filter(store=store,current_stock=0)
+        total_out_of_stock=out_of_stock.count()
 
         #warning stock current stock is +5 than minimum stock
         warning_stock=Product.objects.filter(store=store,current_stock__gt=F("minimum_stock"),current_stock__lte=F("minimum_stock")+5)
+        total_warning_stock=warning_stock.count()
 
         #low stock
         low_stock=Product.objects.filter(store=store,current_stock__gt=0,current_stock__lte=F("minimum_stock"))
+        total_low_stock=low_stock.count()
 
+        total=total_out_of_stock+total_warning_stock+total_low_stock
+        low_stock_total=total_warning_stock + total_low_stock # low stock + warning stock
+        
+        # skus
+        skus=Product.objects.filter(store=store).count()
+        print(skus)
         return render(request,self.template_name,context={
+                "active_page":"inventory",
                 "out_of_stock":out_of_stock,
+                "total_out_of_stock":total_out_of_stock,
                 "warning_stock":warning_stock,
-                "low_stock":low_stock
+                "total_warning_stock":total_warning_stock,
+                "low_stock":low_stock,
+                "total_low_stock":total_low_stock,
+                "total":total,
+                "low_stock_total":low_stock_total,
+                'skus':skus
             }
         )
         
