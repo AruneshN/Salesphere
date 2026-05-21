@@ -132,7 +132,7 @@ class createbill(LoginRequiredMixin, TemplateView):
     template_name = "dashboard.html"
     login_url = '/'
     def get(self, request):
-        return render(request, 'template.html', {
+        return render(request, self.template_name, {
             'active_page': 'bills',
         })
     def post(self, request, *args, **kwargs):

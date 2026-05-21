@@ -265,28 +265,28 @@ select{cursor:pointer}
   </div>
 
   <div class="nav-section">Main</div>
-  <div class="nav-item active" onclick="navigate('dashboard',this)">
+  <div class="nav-item " data-url="/dashboard/" onclick="window.location.href='{% url 'dashboard' %}'">
     <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><rect x="1" y="1" width="6" height="6" rx="1.5"/><rect x="9" y="1" width="6" height="6" rx="1.5"/><rect x="1" y="9" width="6" height="6" rx="1.5"/><rect x="9" y="9" width="6" height="6" rx="1.5"/></svg>
     Dashboard
   </div>
-  <div class="nav-item" onclick="navigate('customers',this)">
+  <div class="nav-item" data-url="/add_customer/" onclick="window.location.href='{% url 'add-customer' %}'">
     <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M8 1a2.5 2.5 0 100 5 2.5 2.5 0 000-5zM3 11.5C3 9.567 5.239 8 8 8s5 1.567 5 3.5V14H3v-2.5z"/></svg>
     Customers
   </div>
-  <div class="nav-item" onclick="navigate('products',this)">
+  <div class="nav-item"  data-url="/add_product/" onclick="window.location.href='{% url 'add-new-product' %}'">
     <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M3 2h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1zm1 3v6h8V5H4zm0-2v1h8V3H4z"/></svg>
     Products
   </div>
-  <div class="nav-item" onclick="navigate('bills',this)">
-    <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M2 3h12v2H2zM2 7h8v2H2zM2 11h6v2H2z"/></svg>
+    <div class="nav-item" data-url="/create_bill/" onclick="window.location.href='{% url 'create-bill' %}'">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><path d="M2 3h12v2H2zM2 7h8v2H2zM2 11h6v2H2z"/></svg>
     Bills
     <span class="nav-badge">3</span>
   </div>
-  <div class="nav-item" onclick="navigate('inventory',this)">
-    <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M5 3V2M11 3V2M2 7h12" stroke="currentColor" stroke-width="1.2"/></svg>
-    Inventory
-    <span class="nav-badge">23</span>
-  </div>
+    <div class="nav-item" data-url="/stock_alert/" onclick="window.location.href='{% url 'stock-alert' %}'">
+      <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M5 3V2M11 3V2M2 7h12" stroke="currentColor" stroke-width="1.2"/></svg>
+      Inventory
+      <span class="nav-badge">23</span>
+    </div>
 
   <div class="nav-section">Finance</div>
   <div class="nav-item" onclick="navigate('payments',this)">
@@ -338,27 +338,27 @@ select{cursor:pointer}
   </div>
 
   <!-- ========== PAGE: DASHBOARD ========== -->
-  <div class="page active" id="p-dashboard">
+  <!-- <div class="page active" id="p-dashboard"> -->
   
-
-    <div class="quick-actions">
-      <button class="qa-btn" onclick="navigate('products', document.querySelector('[onclick*=products]'))">
+  <div class="page" id="p-dashboard">
+      <div class="quick-actions">
+      <button class="qa-btn" onclick="window.location.href='{% url 'add-new-product' %}'">
         <span class="qa-icon" style="background:#eff3ff"><svg width="13" height="13" viewBox="0 0 16 16" fill="#2563ff"><path d="M8 2v12M2 8h12"/></svg></span>
         Add Product
       </button>
-      <button class="qa-btn" onclick="navigate('bills', document.querySelector('[onclick*=bills]'))">
+      <button class="qa-btn" onclick="window.location.href='{% url 'create-bill' %}'">
         <span class="qa-icon" style="background:#f0fdf4"><svg width="13" height="13" viewBox="0 0 16 16" fill="#16a34a"><path d="M2 3h12v2H2zM2 7h8v2H2zM2 11h6v2H2z"/></svg></span>
         Create Bill
       </button>
-      <button class="qa-btn" onclick="navigate('customers', document.querySelector('[onclick*=customers]'))">
+      <button class="qa-btn" onclick="window.location.href='{% url 'add-customer' %}'">
         <span class="qa-icon" style="background:#fdf4ff"><svg width="13" height="13" viewBox="0 0 16 16" fill="#9333ea"><path d="M8 1a3 3 0 100 6 3 3 0 000-6zM3 13s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3z"/></svg></span>
         Add Customer
       </button>
-      <button class="qa-btn" onclick="navigate('inventory', document.querySelector('[onclick*=inventory]'))">
+      <button class="qa-btn" onclick="window.location.href='{% url 'stock-alert' %}'">
         <span class="qa-icon" style="background:#fef2f2"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#dc2626" stroke-width="1.5"><path d="M8 1L1 14h14L8 1z"/><path d="M8 6v3M8 11v1"/></svg></span>
         Stock Alerts
       </button>
-      <button class="qa-btn" onclick="navigate('bills', document.querySelector('[onclick*=bills]'))">
+      <button class="qa-btn" onclick="window.location.href='{% url 'create-bill' %}'">
         <span class="qa-icon" style="background:#fffbeb"><svg width="13" height="13" viewBox="0 0 16 16" fill="none" stroke="#d97706" stroke-width="1.4"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2" stroke-linecap="round"/></svg></span>
         Today's Sales
       </button>
@@ -839,7 +839,6 @@ const pageMeta = {
   settings:   {title:'Settings',             sub:'System configuration'},
 };
 
-// ---- PRODUCTS DATA FROM DB ----
 const allProducts = [
   {% for product in billitemform.product.field.queryset %}
   {
@@ -851,8 +850,6 @@ const allProducts = [
   {% endfor %}
 ];
 
-// ---- SEARCH FILTER ----
-
 const globalDropdown = document.getElementById('globalDropdown');
 let activeInput = null;
 let activeRow = null;
@@ -860,25 +857,16 @@ let activeRow = null;
 function attachSearch(row) {
   if (row.dataset.searchAttached) return;
   row.dataset.searchAttached = 'true';
-
   const searchInput = row.querySelector('.product-search');
   const productId   = row.querySelector('.product-id');
   if (!searchInput) return;
-
   searchInput.addEventListener('input', function() {
     activeInput = searchInput;
     activeRow   = row;
-
     const query = this.value.toLowerCase().trim();
     globalDropdown.innerHTML = '';
-
-    if (query.length === 0) { 
-      globalDropdown.style.display = 'none'; 
-      return; 
-    }
-
+    if (query.length === 0) { globalDropdown.style.display = 'none'; return; }
     const filtered = allProducts.filter(p => p.name.toLowerCase().includes(query));
-
     if (filtered.length === 0) {
       globalDropdown.innerHTML = '<div style="padding:10px;color:#888">No products found</div>';
     } else {
@@ -902,53 +890,23 @@ function attachSearch(row) {
         globalDropdown.appendChild(item);
       });
     }
-
-    //  position dropdown at input location
     const rect = searchInput.getBoundingClientRect();
     globalDropdown.style.top   = rect.bottom + window.scrollY + 'px';
     globalDropdown.style.left  = rect.left + 'px';
     globalDropdown.style.width = rect.width + 'px';
     globalDropdown.style.display = 'block';
   });
-
   searchInput.addEventListener('blur', function() {
     setTimeout(() => globalDropdown.style.display = 'none', 200);
   });
 }
 
-// close on outside click
 document.addEventListener('mousedown', function(e) {
   if (e.target !== globalDropdown && !globalDropdown.contains(e.target)) {
-    if (activeInput && e.target !== activeInput) {
-      globalDropdown.style.display = 'none';
-    }
+    if (activeInput && e.target !== activeInput) globalDropdown.style.display = 'none';
   }
 });
 
-function navigate(id, navEl) {
-  // hide all pages
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-
-  const page = document.getElementById('p-' + id);
-  if (page) page.classList.add('active');
-  if (navEl) navEl.classList.add('active');
-
-  const m = pageMeta[id] || {};
-  document.getElementById('pageTitle').textContent = m.title || '';
-  document.getElementById('pageSub').textContent = m.sub || '';
-
-  // re-init chart if going to dashboard
-  if (id === 'dashboard') setTimeout(initChart, 50);
-
-    // ✅ attach search when bills page opens
-  if (id === 'bills') {
-    setTimeout(() => {
-      document.querySelectorAll('#lineBody tr').forEach(row => attachSearch(row));
-    }, 50);  
-}
-}
-// ---- TOAST ----
 let toastTimer;
 function toast(msg) {
   const el = document.getElementById('toast');
@@ -958,7 +916,6 @@ function toast(msg) {
   toastTimer = setTimeout(() => el.classList.remove('show'), 2800);
 }
 
-// ---- CHART ----
 let chartInst;
 function initChart() {
   const canvas = document.getElementById('salesChart');
@@ -986,51 +943,36 @@ function initChart() {
     }
   });
 }
-initChart();
 
-// ---- LINE ITEMS ----
 function calcRow(el) {
   const row = el.closest('tr');
   const qty = parseFloat(row.cells[1].querySelector('input').value)||0;
   const price = parseFloat(row.cells[2].querySelector('input').value)||0;
   const tax = parseFloat(row.cells[3].querySelector('select').value)||0;
-  
-  const base= qty*price;
-  const taxAmt= base *(tax/100);
-  
-  // row.cells[4].querySelector('input').value = Math.round(qty * price * (1 + tax/100));
+  const base = qty * price;
+  const taxAmt = base * (tax / 100);
   row.cells[4].querySelector('input').value = Math.round(base + taxAmt);
   updateBillTotal();
-
 }
 
 function updateBillTotal() {
-  let subtotal = 0;
-  let taxTotal = 0;
-
-  const rows = document.querySelectorAll('#lineBody tr');
-
-  rows.forEach(row => {
+  let subtotal = 0, taxTotal = 0;
+  document.querySelectorAll('#lineBody tr').forEach(row => {
     const qty = parseFloat(row.cells[1].querySelector('input').value) || 0;
     const price = parseFloat(row.cells[2].querySelector('input').value) || 0;
     const tax = parseFloat(row.cells[3].querySelector('select').value) || 0;
-
     const base = qty * price;
-    const taxAmt = base * (tax / 100);
-
     subtotal += base;
-    taxTotal += taxAmt;
+    taxTotal += base * (tax / 100);
   });
-
   const discount = parseFloat(document.getElementById('discount')?.value) || 0;
-
   const total = subtotal + taxTotal - discount;
-
   document.getElementById('subtotal').textContent = "₹" + subtotal.toFixed(2);
   document.getElementById('taxTotal').textContent = "₹" + taxTotal.toFixed(2);
   document.getElementById('discountShow').textContent = "₹" + discount.toFixed(2);
   document.getElementById('grandTotal').textContent = "₹" + total.toFixed(2);
 }
+
 function delRow(btn) {
   const tbody = document.getElementById('lineBody');
   if (tbody.rows.length > 1) { btn.closest('tr').remove(); toast('🗑️ Item removed'); }
@@ -1044,12 +986,10 @@ function addRow() {
     <td style="position:relative">
       <input type="text" class="product-search" placeholder="Search product..." autocomplete="off">
       <input type="hidden" class="product-id" name="product">
-      <div class="product-dropdown" style="position:absolute;top:100%;left:0;right:0;background:white;border:1px solid #ddd;border-radius:8px;
-      max-height:180px;overflow-y:auto;display:none;z-index:999;box-shadow:0 4px 12px rgba(0,0,0,0.1)"></div>
     </td>
-    <td><input type="number" placeholder="Qty" min="1" oninput="calcRow(this)"></td>
-    <td><input type="number" placeholder="Price" oninput="calcRow(this)"></td>
-    <td><select onchange="calcRow(this)">
+    <td><input type="number" placeholder="Qty" min="1" oninput="calcRow(this)" name="quantity"></td>
+    <td><input type="number" placeholder="Price" oninput="calcRow(this)" name="unit_price"></td>
+    <td><select onchange="calcRow(this)" name="tax">
       <option value="0">0%</option>
       <option value="5">5%</option>
       <option value="12" selected>12%</option>
@@ -1064,12 +1004,11 @@ function addRow() {
   tr.querySelector('.product-search').focus();
 }
 
-
-// ---- FILTER CHIPS ----
 function filterChip(btn) {
   btn.closest('.filter-row').querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
   btn.classList.add('active');
 }
+
 function alertFilter(btn, type) {
   btn.closest('.filter-row').querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
   btn.classList.add('active');
@@ -1078,6 +1017,40 @@ function alertFilter(btn, type) {
   });
 }
 
+// ---- AUTO ACTIVATE PAGE ON LOAD ----
+window.addEventListener('DOMContentLoaded', function() {
+  const path = window.location.pathname;
+
+  let activePage = 'dashboard';
+  if (path.includes('add_product'))  activePage = 'products';
+  if (path.includes('add_customer')) activePage = 'customers';
+  if (path.includes('create_bill'))  activePage = 'bills';
+  if (path.includes('stock_alert'))  activePage = 'inventory';
+  if (path.includes('dashboard'))    activePage = 'dashboard';
+
+  // show correct page
+  const page = document.getElementById('p-' + activePage);
+  if (page) page.classList.add('active');
+
+  // update topbar
+  const m = pageMeta[activePage] || {};
+  document.getElementById('pageTitle').textContent = m.title || '';
+  document.getElementById('pageSub').textContent = m.sub || '';
+
+
+
+  document.querySelectorAll('.nav-item').forEach(n => {
+    if (n.dataset.url === window.location.pathname) {
+        n.classList.add('active');
+    }
+});
+
+  // page specific init
+  if (activePage === 'dashboard') initChart();
+  if (activePage === 'bills') {
+    document.querySelectorAll('#lineBody tr').forEach(row => attachSearch(row));
+  }
+});
 </script>
 </body>
 </html>
