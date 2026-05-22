@@ -5,9 +5,11 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import authenticate,login,logout
 from . import forms
 from .forms import Registeruser,Userstore,Productform,Customerform,Billform,Billitemform
-from .models import Bill,Product
+from .models import Bill,Product,Customer
 from django.db.models import F
 from datetime import date
+from django.utils import timezone
+
 
 # Create your views here.
 
@@ -63,16 +65,37 @@ class signup(TemplateView):
 class dashboard(LoginRequiredMixin,TemplateView):
     template_name="dashboard.html"
     login_url='/'
+      
+    def get(self,request,*args,**kwargs):
+        store=request.user.store
+        total_products=Product.objects.count()
+        total_customer=Customer.objects.count()
+        total_bill=Bill.objects.count()
+
+        # current month revenue
+        date=timezone.now().date()
+        this_month_bills=Bill.objects.filter(store=store,created_at__month=date.month,created_at__year=date.year)
+        this_month_revenue=sum(bill.grand_total for bill in this_month_bills)
+
+        return render(request,self.template_name,context={
+            "total_products":total_products,
+            "total_customer":total_customer,
+            "total_bill":total_bill,
+            "this_month_revenue":this_month_revenue     
+        })
+
 
 class add_product(LoginRequiredMixin,TemplateView):
     template_name="dashboard.html"
     login_url='/'
+    
 
     def get(self,request,*args,**kwargs):
         productform=Productform()
         return render(request,self.template_name,context={
             "active_page":'dashboard',
             "productform":productform
+           
         })
 
     def post(self,request,*args,**kwargs):
@@ -171,35 +194,11 @@ class stock_alert(LoginRequiredMixin,TemplateView):
     login_url='/'
     def get(self,request,*args,**kwargs):
         store=request.user.store
-        
-        # out_of_stock - current stock is 0
-        out_of_stock=Product.objects.filter(store=store,current_stock=0)
-        total_out_of_stock=out_of_stock.count()
-
-        #warning stock current stock is +5 than minimum stock
-        warning_stock=Product.objects.filter(store=store,current_stock__gt=F("minimum_stock"),current_stock__lte=F("minimum_stock")+5)
-        total_warning_stock=warning_stock.count()
-
-        #low stock
-        low_stock=Product.objects.filter(store=store,current_stock__gt=0,current_stock__lte=F("minimum_stock"))
-        total_low_stock=low_stock.count()
-
-        total=total_out_of_stock+total_warning_stock+total_low_stock
-        low_stock_total=total_warning_stock + total_low_stock # low stock + warning stock
-        
         # skus
         skus=Product.objects.filter(store=store).count()
         print(skus)
         return render(request,self.template_name,context={
                 "active_page":"inventory",
-                "out_of_stock":out_of_stock,
-                "total_out_of_stock":total_out_of_stock,
-                "warning_stock":warning_stock,
-                "total_warning_stock":total_warning_stock,
-                "low_stock":low_stock,
-                "total_low_stock":total_low_stock,
-                "total":total,
-                "low_stock_total":low_stock_total,
                 'skus':skus
             }
         )

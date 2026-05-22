@@ -245,6 +245,21 @@ select{cursor:pointer}
 .crit .af-qty{color:var(--danger)}
 .warn .af-qty{color:var(--warning)}
 .low .af-qty{color:var(--accent)}
+
+/* product table */
+.alerts-hd-right{display:flex;gap:8px;align-items:center}
+
+.btn-view-all{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:8px 18px;border-radius:var(--radius);
+  background:var(--surface2);border:1px solid var(--border2);
+  font-family:inherit;font-size:13px;font-weight:500;
+  color:var(--text);cursor:pointer;transition:all 0.15s;
+}
+.btn-view-all:hover{background:#e8eaf0;border-color:rgba(0,0,0,0.2)}
+.btn-view-all svg{width:15px;height:15px;color:var(--accent)}
+
+
 </style>
 </head>
 <body>
@@ -285,7 +300,7 @@ select{cursor:pointer}
     <div class="nav-item" data-url="/stock_alert/" onclick="window.location.href='{% url 'stock-alert' %}'">
       <svg class="nav-icon" viewBox="0 0 16 16" fill="currentColor"><rect x="2" y="3" width="12" height="10" rx="1.5" stroke="currentColor" stroke-width="1.2" fill="none"/><path d="M5 3V2M11 3V2M2 7h12" stroke="currentColor" stroke-width="1.2"/></svg>
       Inventory
-      <span class="nav-badge">23</span>
+      <span class="nav-badge">{{total_out_of_stock |add:low_stock_total}}</span>
     </div>
 
   <div class="nav-section">Finance</div>
@@ -333,7 +348,7 @@ select{cursor:pointer}
         <div class="notif-dot"></div>
       </div>
       <button class="btn btn-ghost" onclick="toast('📤 Export started')">Export</button>
-      <button class="btn btn-primary" onclick="navigate('bills',document.querySelector('[onclick*=bills]'))">+ New Bill</button>
+      <button class="btn btn-primary" onclick="window.location.href='{% url 'create-bill' %}'">+ New Bill</button>
     </div>
   </div>
 
@@ -367,33 +382,33 @@ select{cursor:pointer}
     <div class="kpi-grid">
       <div class="kpi-card">
         <div class="kpi-ico-row"><div class="kpi-ico" style="background:#eff3ff"><svg width="16" height="16" viewBox="0 0 16 16" fill="#2563ff"><path d="M3 2h10a1 1 0 011 1v10a1 1 0 01-1 1H3a1 1 0 01-1-1V3a1 1 0 011-1zm1 3v6h8V5H4z"/></svg></div></div>
-        <div class="kpi-label">Total Products</div><div class="kpi-val">1,284</div>
+        <div class="kpi-label">Total Products</div><div class="kpi-val">{{total_products}}</div>
         <div class="kpi-badge badge-up">↑ 12 this week</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-ico-row"><div class="kpi-ico" style="background:#fdf4ff"><svg width="16" height="16" viewBox="0 0 16 16" fill="#9333ea"><path d="M8 1a3 3 0 100 6 3 3 0 000-6zM3 13s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1H3z"/></svg></div></div>
-        <div class="kpi-label">Customers</div><div class="kpi-val">847</div>
+        <div class="kpi-label">Customers</div><div class="kpi-val">{{total_customer}}</div>
         <div class="kpi-badge badge-up">↑ 5 new</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-ico-row"><div class="kpi-ico" style="background:#f0fdf4"><svg width="16" height="16" viewBox="0 0 16 16" fill="#16a34a"><path d="M2 3h12v2H2zM2 7h8v2H2zM2 11h6v2H2z"/></svg></div></div>
-        <div class="kpi-label">Total Bills</div><div class="kpi-val">3,521</div>
+        <div class="kpi-label">Total Bills</div><div class="kpi-val">{{total_bill}}</div>
         <div class="kpi-badge badge-up">↑ 34 this month</div>
       </div>
       <div class="kpi-card">
         <div class="kpi-ico-row"><div class="kpi-ico" style="background:#eff3ff"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#2563ff" stroke-width="1.4"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2" stroke-linecap="round"/></svg></div></div>
-        <div class="kpi-label">Revenue</div><div class="kpi-val" style="font-size:19px">₹4.8L</div>
+        <div class="kpi-label">Revenue</div><div class="kpi-val" style="font-size:19px">{{this_month_revenue}}</div>
         <div class="kpi-badge badge-up">↑ 18% vs last mo</div>
       </div>
       <div class="kpi-card" style="border-color:#fecaca">
         <div class="kpi-ico-row"><div class="kpi-ico" style="background:#fef2f2"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#dc2626" stroke-width="1.5"><path d="M8 1L1 14h14L8 1z"/><path d="M8 6v3M8 11v1"/></svg></div></div>
-        <div class="kpi-label">Low Stock</div><div class="kpi-val" style="color:#dc2626">23</div>
-        <div class="kpi-badge badge-down">6 critical</div>
+        <div class="kpi-label">Low Stock</div><div class="kpi-val" style="color:#dc2626">{{low_stock_total}}</div>
+        <div class="kpi-badge badge-down">{{total_out_of_stock}} critical</div>
       </div>
       <div class="kpi-card" style="border-color:#bbf7d0">
         <div class="kpi-ico-row"><div class="kpi-ico" style="background:#f0fdf4"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" stroke="#16a34a" stroke-width="1.5" stroke-linecap="round"><path d="M2 12h12M4 9l2-3 3 2 3-5"/></svg></div></div>
-        <div class="kpi-label">Today's Sales</div><div class="kpi-val" style="font-size:19px">₹12,450</div>
-        <div class="kpi-badge badge-up">8 bills today</div>
+        <div class="kpi-label">Today's Sales</div><div class="kpi-val" style="font-size:19px">{{today_revenue}}</div>
+        <div class="kpi-badge badge-up">{{today_bill_count}} bills today</div>
       </div>
     </div>
 
@@ -412,14 +427,26 @@ select{cursor:pointer}
       <div class="card">
         <div class="card-header">
           <div><div class="card-title">Stock alerts</div><div class="card-sub">Requires attention</div></div>
-          <span style="background:#fef2f2;color:#dc2626;font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;font-family:var(--mono)">23 items</span>
+          <span style="background:#fef2f2;color:#dc2626;font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;font-family:var(--mono)">{{low_stock_total|add:total_out_of_stock}} items</span>
         </div>
-        <div class="alert-item"><div class="alert-dot dot-danger"></div><div><div class="alert-name">Bluetooth Headphones Pro</div><div class="alert-sub">Out of stock</div></div><div class="alert-qty" style="color:#dc2626">0</div></div>
-        <div class="alert-item"><div class="alert-dot dot-danger"></div><div><div class="alert-name">USB-C Hub 7-in-1</div><div class="alert-sub">Critical — reorder now</div></div><div class="alert-qty" style="color:#dc2626">2</div></div>
-        <div class="alert-item"><div class="alert-dot dot-warn"></div><div><div class="alert-name">Wireless Keyboard MX</div><div class="alert-sub">Below min threshold</div></div><div class="alert-qty" style="color:#d97706">7</div></div>
-        <div class="alert-item"><div class="alert-dot dot-warn"></div><div><div class="alert-name">Gaming Mouse RGB</div><div class="alert-sub">Low stock warning</div></div><div class="alert-qty" style="color:#d97706">9</div></div>
-        <div class="alert-item"><div class="alert-dot dot-warn"></div><div><div class="alert-name">LED Monitor 24"</div><div class="alert-sub">Below min threshold</div></div><div class="alert-qty" style="color:#d97706">4</div></div>
-        <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:14px;font-size:11px" onclick="navigate('inventory',document.querySelector('[onclick*=inventory]'))">View all 23 alerts →</button>
+        <!-- out of stock -->
+        {% for stock_alert_lst in stock_alert|slice:":5" %}
+        {% if stock_alert_lst.current_stock <= 0 %}
+          <div class="alert-item"><div class="alert-dot dot-danger"></div><div><div class="alert-name">{{stock_alert_lst}}</div>
+          <div class="alert-sub">Critical — reorder now</div>
+        </div><div class="alert-qty" style="color:#dc2626">{{stock_alert_lst.current_stock|floatformat:0}}</div></div>
+        {% elif stock_alert_lst.current_stock > stock_alert_lst.minimum_stock and  stock_alert_lst.current_stock <= stock_alert_lst.minimum_stock|add:5 %}
+                  <div class="alert-item"><div class="alert-dot dot-warn"></div><div><div class="alert-name">{{stock_alert_lst}}</div>
+                  <div class="alert-sub">Below min threshold</div></div>
+                  <div class="alert-qty" style="color:#d97706">{{stock_alert_lst.current_stock|floatformat:0}}</div></div>
+
+        {% elif stock_alert_lst.current_stock > 0 and stock_alert_lst.current_stock <= stock_alert_lst.minimum_stock %}
+        <div class="alert-item"><div class="alert-dot dot-warn"></div><div><div class="alert-name">{{stock_alert_lst}}</div>
+                  <div class="alert-sub">Below min threshold</div></div>
+                  <div class="alert-qty" style="color:#d97706">{{stock_alert_lst.current_stock|floatformat:0}}</div></div>
+        {% endif %}
+        {% endfor %}
+        <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:14px;font-size:11px" onclick="window.location.href='{% url 'stock-alert' %}'">View all {{low_stock_total|add:total_out_of_stock}} alerts →</button>
       </div>
     </div>
 
@@ -479,8 +506,6 @@ select{cursor:pointer}
             {% endfor %}
         </select>
       </div>
-
-
         <div class="form-group"><label class="lbl">Brand / Manufacturer</label><input type="text" placeholder="e.g. Logitech" name="brand"></div>
         <div class="form-group full"><label class="lbl">Description</label><textarea placeholder="Product description, features, specifications..." name="description"></textarea></div>
       </div>
@@ -533,14 +558,13 @@ select{cursor:pointer}
     </div>
   </form>
   </div>
- 
-      
+
   <!-- ========== PAGE: CREATE BILL ========== -->
   <div class="page" id="p-bills">
     <!-- Stats row -->
     <div class="stats-row">
-      <div class="stat-mini"><div class="stat-mini-label">Revenue Today</div><div class="stat-mini-value">₹12,450</div><div class="stat-mini-sub up">↑ 18% vs yesterday</div></div>
-      <div class="stat-mini"><div class="stat-mini-label">Bills Today</div><div class="stat-mini-value">8</div><div class="stat-mini-sub up">↑ 3 more than avg</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Revenue Today</div><div class="stat-mini-value">{{today_revenue}}</div><div class="stat-mini-sub up">↑ 18% vs yesterday</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Bills Today</div><div class="stat-mini-value">{{today_bill_count}}</div><div class="stat-mini-sub up">↑ 3 more than avg</div></div>
       <div class="stat-mini"><div class="stat-mini-label">Collected</div><div class="stat-mini-value">₹9,210</div><div class="stat-mini-sub" style="color:var(--text-muted)">74% collection rate</div></div>
       <div class="stat-mini"><div class="stat-mini-label">Pending</div><div class="stat-mini-value" style="color:var(--warning)">₹3,240</div><div class="stat-mini-sub down">2 bills unpaid</div></div>
     </div>
@@ -634,7 +658,6 @@ select{cursor:pointer}
         <button class="btn btn-primary" onclick="toast('✅ Bill #SS-1032 created!')" type="submit">🧾 Create Bill</button>
       </div>
         </form>
-
     </div>
 
     <!-- Recent bills table -->
@@ -699,9 +722,7 @@ select{cursor:pointer}
       <div class="form-grid form-grid-2">
         <div class="form-group full"><label class="lbl">Street Address</label><textarea placeholder="Building, street, area..." style="min-height:58px" name="address"></textarea></div>
         <div class="form-group"><label class="lbl">City</label><input type="text" placeholder="e.g. Tiruchirappalli" name="city"></div>
-        <!-- <div class="form-group"><label class="lbl">State</label><select><option>Tamil Nadu</option><option>Karnataka</option><option>Kerala</option><option>Andhra Pradesh</option><option>Maharashtra</option><option>Delhi</option></select></div> -->
-          <div class="form-group"><label class="lbl">City</label><input type="text" placeholder="e.g. Tamil Nadu" name="state"></div>
-
+          <div class="form-group"><label class="lbl">State</label><input type="text" placeholder="e.g. Tamil Nadu" name="state"></div>
         <div class="form-group"><label class="lbl">PIN Code</label><input type="text" placeholder="620001" maxlength="6" name="pincode"></div>
         <div class="form-group"><label class="lbl">Country</label><input type="text" placeholder="e.g India" style="color:var(--text-muted)" name="country"></div>
       </div>
@@ -740,10 +761,10 @@ select{cursor:pointer}
   <!-- ========== PAGE: INVENTORY / STOCK ALERTS ========== -->
   <div class="page" id="p-inventory">
     <div class="stats-row">
-      <div class="stat-mini" style="border-color:#fecaca"><div class="stat-mini-label">Out of Stock</div><div class="stat-mini-value" style="color:var(--danger)">6</div><div class="stat-mini-sub down">Critical — reorder now</div></div>
-      <div class="stat-mini" style="border-color:#fde68a"><div class="stat-mini-label">Low Stock</div><div class="stat-mini-value" style="color:var(--warning)">17</div><div class="stat-mini-sub" style="color:var(--warning)">Below minimum threshold</div></div>
+      <div class="stat-mini" style="border-color:#fecaca"><div class="stat-mini-label">Out of Stock</div><div class="stat-mini-value" style="color:var(--danger)">{{total_out_of_stock}}</div><div class="stat-mini-sub down">Critical — reorder now</div></div>
+      <div class="stat-mini" style="border-color:#fde68a"><div class="stat-mini-label">Low Stock</div><div class="stat-mini-value" style="color:var(--warning)">{{total_low_stock}}</div><div class="stat-mini-sub" style="color:var(--warning)">Below minimum threshold</div></div>
       <div class="stat-mini"><div class="stat-mini-label">Total SKUs</div><div class="stat-mini-value">{{skus}}</div><div class="stat-mini-sub up">↑ 12 this week</div></div>
-      <div class="stat-mini" style="border-color:#bbf7d0"><div class="stat-mini-label">Healthy Stock</div><div class="stat-mini-value" style="color:var(--success)">1,261</div><div class="stat-mini-sub up">98.3% of products</div></div>
+      <div class="stat-mini" style="border-color:#bbf7d0"><div class="stat-mini-label">Healthy Stock</div><div class="stat-mini-value" style="color:var(--success)">{{total_healthy_stock}}</div><div class="stat-mini-sub up">98.3% of products</div></div>
     </div>
 
     <div class="sec-card">
@@ -754,9 +775,17 @@ select{cursor:pointer}
           </div>
             <div><div style="font-size:15px;font-weight:600">Stock Alerts</div><div style="font-size:11px;color:var(--text-muted);margin-top:2px">{{total}} products require immediate attention</div></div>
         </div>
-        <button class="btn btn-primary btn-sm" onclick="toast('📤 Alert report exported')">Export Report</button>
-      </div>
+        <!-- <button class="btn btn-primary btn-sm" onclick="toast('📤 Alert report exported')">Export Report</button> -->
 
+         <div class="alerts-hd-right">
+        <button class="btn-view-all" onclick="showPage('stock')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="9" rx="1"/><rect x="14" y="3" width="7" height="5" rx="1"/><rect x="14" y="12" width="7" height="9" rx="1"/><rect x="3" y="16" width="7" height="5" rx="1"/></svg>
+          View all stock
+        </button>
+        <button class="btn btn-primary">Export Report</button>
+      </div>
+      </div>
+      
       <div class="filter-row">
         <button class="chip active" onclick="alertFilter(this,'all')">All {{total}}</button>
         <button class="chip" onclick="alertFilter(this,'crit')" style="color:var(--danger)">🔴 Critical {{total_out_of_stock}}</button>
@@ -765,14 +794,22 @@ select{cursor:pointer}
       </div>
 
       <div id="alertList">
-        <div class="alert-full crit" data-t="crit"><div class="af-dot"></div><div class="af-info"><strong>Bluetooth Headphones Pro</strong><span>Out of stock · SKU: BHP-204 · Last sold: Today</span></div><div class="af-qty">0</div><button class="btn btn-ghost btn-sm" onclick="toast('📋 Reorder raised for Bluetooth Headphones Pro')">Reorder</button></div>
-        <div class="alert-full crit" data-t="crit"><div class="af-dot"></div><div class="af-info"><strong>USB-C Hub 7-in-1</strong><span>Critical — reorder now · SKU: UCH-117 · Min: 10</span></div><div class="af-qty">2</div><button class="btn btn-ghost btn-sm" onclick="toast('📋 Reorder raised for USB-C Hub')">Reorder</button></div>
-        <div class="alert-full crit" data-t="crit"><div class="af-dot"></div><div class="af-info"><strong>4K Webcam Pro</strong><span>Out of stock · SKU: WBC-301 · Min: 5</span></div><div class="af-qty">0</div><button class="btn btn-ghost btn-sm" onclick="toast('📋 Reorder raised for 4K Webcam')">Reorder</button></div>
-        <div class="alert-full warn" data-t="warn"><div class="af-dot"></div><div class="af-info"><strong>Wireless Keyboard MX</strong><span>Below min threshold · SKU: WKM-089 · Min: 15</span></div><div class="af-qty">7</div><button class="btn btn-ghost btn-sm" onclick="toast('📋 Reorder raised for Wireless Keyboard MX')">Reorder</button></div>
-        <div class="alert-full warn" data-t="warn"><div class="af-dot"></div><div class="af-info"><strong>Gaming Mouse RGB</strong><span>Low stock warning · SKU: GMR-055 · Min: 20</span></div><div class="af-qty">9</div><button class="btn btn-ghost btn-sm" onclick="toast('📋 Reorder raised for Gaming Mouse RGB')">Reorder</button></div>
-        <div class="alert-full warn" data-t="warn"><div class="af-dot"></div><div class="af-info"><strong>LED Monitor 24"</strong><span>Below min threshold · SKU: LM24-031 · Min: 8</span></div><div class="af-qty">4</div><button class="btn btn-ghost btn-sm" onclick="toast('📋 Reorder raised for LED Monitor 24\"')">Reorder</button></div>
-        <div class="alert-full low" data-t="low"><div class="af-dot"></div><div class="af-info"><strong>AA Battery 8-pack</strong><span>Low stock warning · SKU: AAB-012 · Min: 50</span></div><div class="af-qty">12</div><button class="btn btn-ghost btn-sm" onclick="toast('📋 Reorder raised for AA Battery 8-pack')">Reorder</button></div>
-        <div class="alert-full low" data-t="low"><div class="af-dot"></div><div class="af-info"><strong>HDMI Cable 3m</strong><span>Below min threshold · SKU: HDMI-3M · Min: 25</span></div><div class="af-qty">6</div><button class="btn btn-ghost btn-sm" onclick="toast('📋 Reorder raised for HDMI Cable 3m')">Reorder</button></div>
+
+<!-- out of stock -->
+        {% for out_of_stock_name in out_of_stock %}
+              <div class="alert-full crit" data-t="crit"><div class="af-dot"></div><div class="af-info"><strong>{{out_of_stock_name}}</strong><span>Out of stock · SKU: {{out_of_stock_name.product_code}} · Min: {{out_of_stock_name.minimum_stock}}</span></div><div class="af-qty">{{out_of_stock_name.minimum_stock}}</div><button class="btn btn-ghost btn-sm" onclick="toast('📋 Reorder raised for Bluetooth Headphones Pro')">Reorder</button></div>
+        {% endfor %}
+<!-- out of stock end -->
+ <!-- warning stock  -->
+       {% for warning_stock_name in warning_stock %}
+               <div class="alert-full warn" data-t="warn"><div class="af-dot"></div><div class="af-info"><strong>{{warning_stock_name}}</strong><span>Below min threshold · SKU: {{warning_stock_name.product_code}} · Min: {{warning_stock_name.minimum_stock}}</span></div><div class="af-qty">7</div><button class="btn btn-ghost btn-sm" onclick="toast('📋 Reorder raised for Wireless Keyboard MX')">Reorder</button></div>
+        {% endfor %}
+        <!-- warning stock end -->
+        <!-- low stock -->
+        {% for low_stock_name in low_stock %}
+          <div class="alert-full low" data-t="low"><div class="af-dot"></div><div class="af-info"><strong>{{low_stock_name}}</strong><span>Low stock warning · SKU: {{low_stock_name.product_code}} · Min: {{low_stock_name.minimum_stock}}</span></div><div class="af-qty">{{low_stock_name.current_stock|floatformat:0}}</div><button class="btn btn-ghost btn-sm" onclick="toast('📋 Reorder raised for AA Battery 8-pack')">Reorder</button></div>
+        {% endfor %}
+        <!-- low stock close -->
       </div>
 
       <div style="margin-top:16px;padding-top:16px;border-top:1px solid var(--border);display:flex;justify-content:flex-end">
@@ -821,8 +858,6 @@ select{cursor:pointer}
   box-shadow:0 4px 12px rgba(0,0,0,0.15);
   min-width:200px;
 "></div>
-
-<!-- <div id="toast"></div> -->
 
 <div id="toast"></div>
 
@@ -1045,12 +1080,28 @@ window.addEventListener('DOMContentLoaded', function() {
     }
 });
 
+// ================================= all product table
+function showPage(p){
+  document.querySelectorAll('.page')
+    .forEach(el=>el.classList.remove('active'));
+
+  document
+    .getElementById('page-'+(p==='alerts'?'alerts':'stock'))
+    .classList.add('active');
+
+  if(p==='alerts')renderAlerts();
+
+  if(p==='stock')renderTable();
+}
+
   // page specific init
   if (activePage === 'dashboard') initChart();
   if (activePage === 'bills') {
     document.querySelectorAll('#lineBody tr').forEach(row => attachSearch(row));
   }
 });
+
+
 </script>
 </body>
 </html>

@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from decimal import Decimal, ROUND_HALF_UP
+
 # Create your models here.
 
 # ========================================================= Store
@@ -125,6 +127,7 @@ class Customer(models.Model):
 
 # ================================================= bill ======================
 class Bill(models.Model):
+    
     PAYMENT_METHODS=[
         ("Cash","Cash"),
         ("UPI","UPI"),
@@ -146,6 +149,23 @@ class Bill(models.Model):
 
     def __str__(self):
         return f'BIll {self.Bill_num} - {self.store}'
+    
+     
+    @property
+    def subtotal(self):
+        total = sum(item.line_subtotal for item in self.billitem_set.all())
+        return Decimal(total).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+    @property
+    def total_tax(self):
+        total = sum(item.tax_amount for item in self.billitem_set.all())
+        return Decimal(total).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+    @property
+    def grand_total(self):
+        total = self.subtotal + self.total_tax
+        return Decimal(total).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
 
 class Billitem(models.Model):
     TAX_CHOICES=[
@@ -170,17 +190,21 @@ class Billitem(models.Model):
         if self.product:
             self.product_name=self.product.product_name
         super().save(*args,**kwargs)
-    
-    @property
-    def subtotal(self):
-        return sum(item.line_subtotal for item in self.billitem_set.all())
 
     @property
-    def total_tax(self):
-        return sum(item.tax_amount for item in self.billitem_set.all())
+    def line_subtotal(self):
+        line_subtotal= self.unit_price * self.quantity
+        return Decimal(line_subtotal).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
     @property
-    def grand_total(self):
-        return self.subtotal + self.total_tax
+    def tax_amount(self):
+        from decimal import Decimal
+        tax=self.line_subtotal * (Decimal(self.tax) / 100)
+        return Decimal(tax).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
+
+    @property
+    def line_total(self):
+        line_total=self.line_subtotal + self.tax_amount
+        return Decimal(line_total).quantize(Decimal('0.01'), rounding=ROUND_HALF_UP)
 
 
