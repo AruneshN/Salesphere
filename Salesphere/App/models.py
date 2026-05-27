@@ -127,7 +127,11 @@ class Customer(models.Model):
 
 # ================================================= bill ======================
 class Bill(models.Model):
-    
+    BILL_STATUS = [
+    ("Draft", "Draft"),
+    ("Finalized", "Finalized"),
+    ("Cancelled", "Cancelled"),
+]
     PAYMENT_METHODS=[
         ("Cash","Cash"),
         ("UPI","UPI"),
@@ -142,6 +146,8 @@ class Bill(models.Model):
     customer=models.ForeignKey(Customer,blank=False,on_delete=models.PROTECT,related_name="Bills")
     bill_date=models.DateField(default=timezone.now)
     due_date=models.DateField(default=timezone.now)
+    bill_status=models.CharField(max_length=20,choices=BILL_STATUS,default="Draft")
+    paid_amount=models.DecimalField(max_digits=12,decimal_places=2,default=0)
 
     # line items
     notes=models.CharField(max_length=300,blank=True)
@@ -150,7 +156,33 @@ class Bill(models.Model):
     def __str__(self):
         return f'BIll {self.Bill_num} - {self.store}'
     
-     
+    
+    @property
+    def payment_status(self):
+        if self.bill_status == "Draft":
+            return "Draft"
+
+        today = timezone.now().date()
+
+        # Fully paid
+        if self.paid_amount >= self.grand_total:
+            return "Paid"
+
+        # Partial payment
+        elif self.paid_amount > 0:
+            return "Partial"
+
+        # Overdue unpaid invoice
+        elif self.due_date < today:
+            return "Overdue"
+
+        # No payment yet
+        return "Pending"
+
+    @property
+    def total_quantity(self):
+        return sum(item.quantity for item in self.billitem_set.all())
+
     @property
     def subtotal(self):
         total = sum(item.line_subtotal for item in self.billitem_set.all())

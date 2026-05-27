@@ -130,7 +130,6 @@ tbody tr:hover td{background:rgba(0,0,0,0.015)}
 .s-paid{background:#f0fdf4;color:#16a34a}
 .s-pending{background:#eff6ff;color:#2563eb}
 .s-overdue{background:#fef2f2;color:#dc2626}
-.s-partial{background: white;color: orange;}
 .s-draft{background:var(--page-bg);color:var(--text-muted);border:1px solid var(--border)}
 
 /* ── DASHBOARD ALERTS ── */
@@ -314,13 +313,13 @@ select{cursor:pointer}
 .btn-back-alerts svg{width:13px;height:13px}
 
 /* ── TABLE TOOLBAR ── */
-.table-toolbar {display: flex;align-items: center;gap: 10px;padding: 1rem 1.25rem;border-bottom: 1px solid var(--border);flex-wrap: nowrap;}
-.search-wrap { position: relative; flex: 1; min-width: 0; }
-select.tbl-filter { flex-shrink: 0; }
+.table-toolbar{display:flex;align-items:center;gap:10px;padding:1rem 1.25rem;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.search-wrap{position:relative;flex:1;min-width:200px}
 .search-wrap svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:15px;height:15px;color:var(--muted);pointer-events:none}
 .search-wrap input{width:100%;padding:7px 10px 7px 34px;background:var(--page-bg);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text);font-family:var(--font);font-size:13px;outline:none;transition:border-color 0.15s}
 .search-wrap input:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(37,99,255,0.08);background:#fff}
 .search-wrap input::placeholder{color:var(--muted)}
+select.tbl-filter{padding:7px 10px;background:var(--page-bg);border:1px solid var(--border2);border-radius:var(--radius);color:var(--text);font-family:var(--font);font-size:13px;cursor:pointer;outline:none}
 select.tbl-filter:focus{border-color:var(--accent)}
 
 /* ── STOCK TABLE ── */
@@ -550,67 +549,33 @@ select.tbl-filter:focus{border-color:var(--accent)}
         </div>
         <div class="chart-wrap"><canvas id="salesChart"></canvas></div>
       </div>
-    <div class="card">
+      <div class="card">
         <div class="card-header">
           <div><div class="card-title">Stock alerts</div><div class="card-sub">Requires attention</div></div>
           <span style="background:#fef2f2;color:#dc2626;font-size:10px;font-weight:600;padding:3px 9px;border-radius:20px;font-family:var(--mono)">{{low_stock_total|add:total_out_of_stock}} items</span>
         </div>
-        <!-- out of stock -->
         {% for stock_alert_lst in stock_alert|slice:":5" %}
-        {% if stock_alert_lst.current_stock <= 0 %}
-          <div class="alert-item"><div class="alert-dot dot-danger"></div><div><div class="alert-name">{{stock_alert_lst}}</div>
-          <div class="alert-sub">Critical — reorder now</div>
-        </div><div class="alert-qty" style="color:#dc2626">{{stock_alert_lst.current_stock|floatformat:0}}</div></div>
-        {% elif stock_alert_lst.current_stock > stock_alert_lst.minimum_stock and  stock_alert_lst.current_stock <= stock_alert_lst.minimum_stock|add:5 %}
-                  <div class="alert-item"><div class="alert-dot dot-warn"></div><div><div class="alert-name">{{stock_alert_lst}}</div>
-                  <div class="alert-sub">Below min threshold</div></div>
-                  <div class="alert-qty" style="color:#d97706">{{stock_alert_lst.current_stock|floatformat:0}}</div></div>
-
-        {% elif stock_alert_lst.current_stock > 0 and stock_alert_lst.current_stock <= stock_alert_lst.minimum_stock %}
-        <div class="alert-item"><div class="alert-dot dot-warn"></div><div><div class="alert-name">{{stock_alert_lst}}</div>
-                  <div class="alert-sub">Below min threshold</div></div>
-                  <div class="alert-qty" style="color:#d97706">{{stock_alert_lst.current_stock|floatformat:0}}</div></div>
-        {% endif %}
+          {% if stock_alert_lst.current_stock <= 0 %}
+            <div class="alert-item"><div class="alert-dot dot-danger"></div><div><div class="alert-name">{{stock_alert_lst}}</div><div class="alert-sub">Critical — reorder now</div></div><div class="alert-qty" style="color:#dc2626">{{stock_alert_lst.current_stock|floatformat:0}}</div></div>
+          {% elif stock_alert_lst.current_stock <= stock_alert_lst.minimum_stock %}
+            <div class="alert-item"><div class="alert-dot dot-warn"></div><div><div class="alert-name">{{stock_alert_lst}}</div><div class="alert-sub">Below min threshold</div></div><div class="alert-qty" style="color:#d97706">{{stock_alert_lst.current_stock|floatformat:0}}</div></div>
+          {% endif %}
         {% endfor %}
         <button class="btn btn-ghost" style="width:100%;justify-content:center;margin-top:14px;font-size:11px" onclick="window.location.href='{% url 'stock-alert' %}'">View all {{low_stock_total|add:total_out_of_stock}} alerts →</button>
       </div>
     </div>
+
     <div class="three-col">
       <div class="card" style="grid-column:span 2">
         <div class="card-header"><div class="card-title">Recent bills</div><button class="btn btn-ghost" style="font-size:11px;padding:5px 11px" onclick="window.location.href='{% url 'create-bill' %}'">View all →</button></div>
         <table>
           <thead><tr><th>Bill no.</th><th>Customer</th><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
           <tbody>
-            {% for invoice in bills %}
-            <tr><td><span class="bill-no">{{invoice.Bill_num}}</span></td><td>{{invoice.customer.name}}</td>
-              <td style="color:var(--text-muted)">
-                {% if invoice.created_at.date == today %}
-                  Today, {{ invoice.created_at|date:"g:i a" }}
-                {% elif invoice.created_at.date == yesterday %}
-                   Yesterday, {{ invoice.created_at|date:"g:i a" }}
-
-                {% else %}
-                  {{ invoice.created_at|date:"M d, g:i a" }}
-              {% endif %}
-              </td>
-              <td style="font-family:var(--mono);font-weight:600">{{invoice.grand_total}}</td>
-              <td>
-                {% if invoice.payment_status == "Paid" %}
-                  <span class="status-pill s-paid">{{invoice.payment_status}}</span>
-                {% elif invoice.payment_status == "Pending" %}
-                  <span class="status-pill s-pending">{{invoice.payment_status}}</span>
-                {% elif invoice.payment_status == "Overdue" %}
-                  <span class="status-pill s-overdue">{{invoice.payment_status}}</span>
-                {% elif invoice.payment_status == "Partial" %}
-                  <span class="status-pill s-partial">{{invoice.payment_status}}</span>
-                </td></tr>
-                {% endif %}
-            {% endfor %}
-            <!-- <tr><td><span class="bill-no">#SS-1031</span></td><td>Ravi Kumar</td><td style="color:var(--text-muted)">Today, 4:12 pm</td><td style="font-family:var(--mono);font-weight:600">₹3,200</td><td><span class="status-pill s-paid">Paid</span></td></tr>
+            <tr><td><span class="bill-no">#SS-1031</span></td><td>Ravi Kumar</td><td style="color:var(--text-muted)">Today, 4:12 pm</td><td style="font-family:var(--mono);font-weight:600">₹3,200</td><td><span class="status-pill s-paid">Paid</span></td></tr>
             <tr><td><span class="bill-no">#SS-1030</span></td><td>Meena Textiles</td><td style="color:var(--text-muted)">Today, 1:45 pm</td><td style="font-family:var(--mono);font-weight:600">₹8,750</td><td><span class="status-pill s-pending">Pending</span></td></tr>
             <tr><td><span class="bill-no">#SS-1029</span></td><td>Anand Stores</td><td style="color:var(--text-muted)">Today, 11:20 am</td><td style="font-family:var(--mono);font-weight:600">₹560</td><td><span class="status-pill s-paid">Paid</span></td></tr>
             <tr><td><span class="bill-no">#SS-1028</span></td><td>Kavitha Electronics</td><td style="color:var(--text-muted)">Yesterday</td><td style="font-family:var(--mono);font-weight:600">₹12,400</td><td><span class="status-pill s-paid">Paid</span></td></tr>
-            <tr><td><span class="bill-no">#SS-1027</span></td><td>Selvam Traders</td><td style="color:var(--text-muted)">Yesterday</td><td style="font-family:var(--mono);font-weight:600">₹1,890</td><td><span class="status-pill s-overdue">Overdue</span></td></tr> -->
+            <tr><td><span class="bill-no">#SS-1027</span></td><td>Selvam Traders</td><td style="color:var(--text-muted)">Yesterday</td><td style="font-family:var(--mono);font-weight:600">₹1,890</td><td><span class="status-pill s-overdue">Overdue</span></td></tr>
           </tbody>
         </table>
       </div>
@@ -729,9 +694,9 @@ select.tbl-filter:focus{border-color:var(--accent)}
           </div>
         </div>
         <div class="form-actions">
-          <button class="btn btn-ghost" type="button" onclick="showToast('📋 Saved as draft')" name="save_draft">Save Draft</button>
+          <button class="btn btn-ghost" type="button" onclick="showToast('📋 Saved as draft')">Save Draft</button>
           <button class="btn btn-ghost" type="button" onclick="showToast('👁️ Preview generated')">Preview</button>
-          <button class="btn btn-primary" type="submit" name="create_bill">🧾 Create Bill</button>
+          <button class="btn btn-primary" type="submit">🧾 Create Bill</button>
         </div>
       </form>
     </div>
@@ -748,39 +713,10 @@ select.tbl-filter:focus{border-color:var(--accent)}
       <table>
         <thead><tr><th>Bill No.</th><th>Customer</th><th>Date</th><th>Items</th><th>Amount</th><th>Payment</th><th>Status</th><th></th></tr></thead>
         <tbody>
-                  {% for invoice in bills %}
-                  <tr><td><span class="bill-no">{{invoice.Bill_num}}</span></td><td><span class="av" style="background:#eff3ff;color:#2563ff">{{invoice.customer.name|slice:":1"}}</span>{{invoice.customer.name}}</td>
-                    <td style="color:var(--text-muted)">
-                      {% if invoice.created_at.date == today %}
-                        Today, {{ invoice.created_at|date:"g:i a" }}
-                      {% elif invoice.created_at.date == yesterday %}
-                        Yesterday, {{ invoice.created_at|date:"g:i a" }}
-                      {% else %}
-                        {{ invoice.created_at|date:"M d, g:i a" }}
-                      {% endif %}
-                    </td>
-                      <td style="color:var(--text-muted)">
-                          {{invoice.total_quantity|floatformat:0}} items
-                        </td>
-
-                    <td style="font-family:var(--mono);font-weight:600">{{invoice.grand_total}}</td><td style="color:var(--text-muted)">{{invoice.payment_method}}</td><td>
-                    <span class="status-pill s-paid">
-                        {% if invoice.payment_status == "Paid" %}
-                            <span class="status-pill s-paid">{{ invoice.payment_status }}</span>
-
-                          {% elif invoice.payment_status == "Pending" %}
-                            <span class="status-pill s-pending">{{ invoice.payment_status }}</span>
-
-                          {% elif invoice.payment_status == "Overdue" %}
-                            <span class="status-pill s-overdue">{{ invoice.payment_status }}</span>
-
-                          {% elif invoice.payment_status == "Partial" %}
-                            <span class="status-pill s-partial">{{ invoice.payment_status }}</span>
-                          {% endif %}
-
-                    </span></td>
-                    <td><button class="btn btn-ghost btn-sm" onclick="showToast('👁️ Viewing {{invoice.Bill_num}}')">View</button></td></tr>
-                    {% endfor %}
+          <tr><td><span class="bill-no">#SS-1031</span></td><td><span class="av" style="background:#eff3ff;color:#2563ff">RK</span>Ravi Kumar</td><td style="color:var(--text-muted)">Today 4:12 PM</td><td style="color:var(--text-muted)">3 items</td><td style="font-family:var(--mono);font-weight:600">₹3,200</td><td style="color:var(--text-muted)">UPI</td><td><span class="status-pill s-paid">Paid</span></td><td><button class="btn btn-ghost btn-sm" onclick="showToast('👁️ Viewing #SS-1031')">View</button></td></tr>
+          <tr><td><span class="bill-no">#SS-1030</span></td><td><span class="av" style="background:#fdf4ff;color:#9333ea">MT</span>Meena Textiles</td><td style="color:var(--text-muted)">Today 1:45 PM</td><td style="color:var(--text-muted)">7 items</td><td style="font-family:var(--mono);font-weight:600">₹8,750</td><td style="color:var(--text-muted)">Credit</td><td><span class="status-pill s-pending">Pending</span></td><td><button class="btn btn-ghost btn-sm" onclick="showToast('👁️ Viewing #SS-1030')">View</button></td></tr>
+          <tr><td><span class="bill-no">#SS-1029</span></td><td><span class="av" style="background:#f0fdf4;color:#16a34a">AS</span>Anand Stores</td><td style="color:var(--text-muted)">Today 11:20 AM</td><td style="color:var(--text-muted)">2 items</td><td style="font-family:var(--mono);font-weight:600">₹560</td><td style="color:var(--text-muted)">Cash</td><td><span class="status-pill s-paid">Paid</span></td><td><button class="btn btn-ghost btn-sm" onclick="showToast('👁️ Viewing #SS-1029')">View</button></td></tr>
+          <tr><td><span class="bill-no">#SS-1027</span></td><td><span class="av" style="background:#fef2f2;color:#dc2626">ST</span>Selvam Traders</td><td style="color:var(--text-muted)">Yesterday</td><td style="color:var(--text-muted)">5 items</td><td style="font-family:var(--mono);font-weight:600">₹1,890</td><td style="color:var(--text-muted)">Cheque</td><td><span class="status-pill s-overdue">Overdue</span></td><td><button class="btn btn-ghost btn-sm" onclick="showToast('👁️ Viewing #SS-1027')">View</button></td></tr>
         </tbody>
       </table>
     </div>
@@ -844,7 +780,7 @@ select.tbl-filter:focus{border-color:var(--accent)}
       <!-- Django-rendered stats (always accurate from server) -->
       <div class="stats-row">
         <div class="stat-mini" style="border-color:#fecaca"><div class="stat-mini-label">Out of Stock</div><div class="stat-mini-value" style="color:var(--danger)">{{total_out_of_stock}}</div><div class="stat-mini-sub down">Critical — reorder now</div></div>
-        <div class="stat-mini" style="border-color:#fde68a"><div class="stat-mini-label">Low Stock</div><div class="stat-mini-value" style="color:var(--warning)">{{low_stock_total}}</div><div class="stat-mini-sub" style="color:var(--warning)">Below minimum threshold</div></div>
+        <div class="stat-mini" style="border-color:#fde68a"><div class="stat-mini-label">Low Stock</div><div class="stat-mini-value" style="color:var(--warning)">{{total_low_stock}}</div><div class="stat-mini-sub" style="color:var(--warning)">Below minimum threshold</div></div>
         <div class="stat-mini"><div class="stat-mini-label">Total SKUs</div><div class="stat-mini-value">{{skus}}</div><div class="stat-mini-sub up">↑ 12 this week</div></div>
         <div class="stat-mini" style="border-color:#bbf7d0"><div class="stat-mini-label">Healthy Stock</div><div class="stat-mini-value" style="color:var(--success)">{{total_healthy_stock}}</div><div class="stat-mini-sub up">Products in good stock</div></div>
       </div>
@@ -926,15 +862,15 @@ select.tbl-filter:focus{border-color:var(--accent)}
       <div class="stock-section">
         <div class="stock-section-header">
           <div>
-            <!-- <div class="stock-section-title">All Stock</div> -->
-            <!-- <div class="stock-section-sub">Complete inventory — search, filter, edit &amp; delete</div> -->
+            <div class="stock-section-title">All Stock</div>
+            <div class="stock-section-sub">Complete inventory — search, filter, edit &amp; delete</div>
           </div>
           <button class="btn btn-ghost btn-sm" onclick="exportCSV()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="13" height="13"><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
             Export CSV
           </button>
         </div>
-        <!-- <div class="table-toolbar">
+        <div class="table-toolbar">
           <div class="search-wrap">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
             <input type="text" id="searchInput" placeholder="Search by name or SKU…" oninput="renderStockTable()">
@@ -957,31 +893,7 @@ select.tbl-filter:focus{border-color:var(--accent)}
             <option value="15">15 per page</option>
             <option value="30">30 per page</option>
           </select>
-        </div> -->
-        <div class="table-toolbar" style="display:flex;align-items:center;gap:10px;flex-wrap:nowrap;">
-  <div class="search-wrap" style="flex:1;min-width:0;">
-    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
-    <input type="text" id="searchInput" placeholder="Search by name or SKU…" oninput="renderStockTable()">
-  </div>
-  <select class="tbl-filter" id="catFilter" onchange="renderStockTable()" style="flex-shrink:0;width:160px;">
-    <option value="">All categories</option>
-    <option>Electronics</option>
-    <option>Accessories</option>
-    <option>Peripherals</option>
-    <option>Storage</option>
-  </select>
-  <select class="tbl-filter" id="statusFilter" onchange="renderStockTable()" style="flex-shrink:0;width:140px;">
-    <option value="">All statuses</option>
-    <option value="critical">Critical</option>
-    <option value="warning">Warning</option>
-    <option value="ok">Healthy</option>
-  </select>
-  <select class="tbl-filter" id="perPageSel" onchange="ppChange()" style="flex-shrink:0;width:130px;">
-    <option value="8">8 per page</option>
-    <option value="15">15 per page</option>
-    <option value="30">30 per page</option>
-  </select>
-</div>
+        </div>
         <div class="tbl-wrap">
           <table class="stock-table">
             <thead><tr>
@@ -989,7 +901,6 @@ select.tbl-filter:focus{border-color:var(--accent)}
               <th onclick="sortBy('name')">Product <span class="si" id="ss-name">↕</span></th>
               <th onclick="sortBy('category')">Category <span class="si" id="ss-category">↕</span></th>
               <th onclick="sortBy('qty')">Qty <span class="si" id="ss-qty">↕</span></th>
-              <!-- <th onclick="sortBy('tax')">Tax <span class="si" id="ss-qty">↕</span></th> -->
               <th onclick="sortBy('min')">Min <span class="si" id="ss-min">↕</span></th>
               <th onclick="sortBy('price')">Price <span class="si" id="ss-price">↕</span></th>
               <th onclick="sortBy('lastSold')">Last Sold <span class="si" id="ss-lastSold">↕</span></th>
@@ -1160,47 +1071,45 @@ function alertFilter(btn, type) {
 /* ═══════════════════════════════════════════
    STOCK TABLE DATA
 ═══════════════════════════════════════════ */
-
 let stock = [
-  {% for products in all_products %}
-  {
-    id: {{ products.id }},
-    sku: "{{ products.product_code|escapejs }}",
-    name: "{{ products.product_name|escapejs }}",
-    category: "{{ products.categories.name|escapejs }}",
-    qty: {{ products.current_stock|floatformat:0 }},
-    min: {{ products.minimum_stock|floatformat:0 }},
-    price: {{ products.selling_price|floatformat:0 }},
-    lastSold: "Today",
-  }{% if not forloop.last %},{% endif %}
-  {% endfor %}
+  {id:1,  sku:'BHP-204',  name:'Bluetooth Headphones Pro',  category:'Electronics', qty:0,  min:10, price:3499,  lastSold:'Today'},
+  {id:2,  sku:'UCH-117',  name:'USB-C Hub 7-in-1',          category:'Accessories', qty:2,  min:10, price:1299,  lastSold:'Yesterday'},
+  {id:3,  sku:'WBC-301',  name:'4K Webcam Pro',              category:'Electronics', qty:0,  min:5,  price:5999,  lastSold:'3 days ago'},
+  {id:4,  sku:'WKM-089',  name:'Wireless Keyboard MX',       category:'Peripherals', qty:7,  min:15, price:2199,  lastSold:'Today'},
+  {id:5,  sku:'GMR-055',  name:'Gaming Mouse RGB',            category:'Peripherals', qty:9,  min:20, price:1799,  lastSold:'Today'},
+  {id:6,  sku:'LM24-031', name:'LED Monitor 24"',             category:'Electronics', qty:4,  min:8,  price:12999, lastSold:'2 days ago'},
+  {id:7,  sku:'AAB-012',  name:'AA Battery 8-pack',           category:'Accessories', qty:12, min:50, price:299,   lastSold:'Today'},
+  {id:8,  sku:'HDMI-3M',  name:'HDMI Cable 3m',               category:'Accessories', qty:6,  min:25, price:499,   lastSold:'Yesterday'},
+  {id:9,  sku:'SSD-512',  name:'SSD 512GB',                   category:'Storage',     qty:34, min:10, price:4499,  lastSold:'Today'},
+  {id:10, sku:'USB-FL',   name:'USB Flash Drive 64GB',        category:'Storage',     qty:55, min:20, price:799,   lastSold:'Yesterday'},
+  {id:11, sku:'SPK-WR1',  name:'Portable Bluetooth Speaker',  category:'Electronics', qty:18, min:8,  price:2899,  lastSold:'3 days ago'},
+  {id:12, sku:'MNT-ARM',  name:'Dual Monitor Arm',            category:'Accessories', qty:11, min:5,  price:3199,  lastSold:'4 days ago'},
+  {id:13, sku:'NUM-PAD',  name:'Wireless Numeric Keypad',     category:'Peripherals', qty:22, min:10, price:899,   lastSold:'Today'},
+  {id:14, sku:'CAM-CV1',  name:'Webcam Cover Slider',         category:'Accessories', qty:80, min:30, price:149,   lastSold:'Today'},
+  {id:15, sku:'EXT-HUB',  name:'USB 3.0 Hub 4-Port',         category:'Accessories', qty:3,  min:12, price:699,   lastSold:'Yesterday'},
+  {id:16, sku:'TYPE-C',   name:'USB-C Charging Cable 2m',     category:'Accessories', qty:45, min:20, price:349,   lastSold:'Today'},
+  {id:17, sku:'HDD-1TB',  name:'External HDD 1TB',            category:'Storage',     qty:8,  min:5,  price:3999,  lastSold:'2 days ago'},
+  {id:18, sku:'PWR-20K',  name:'Power Bank 20000mAh',         category:'Electronics', qty:0,  min:8,  price:1999,  lastSold:'5 days ago'},
 ];
 let nextId = 19, tblPage = 1, perPage = 8, sortKey = 'name', sortAsc = true;
 let editId = null, delId = null;
 
-function sStatus(item) { 
-  if (item.qty <= 0) return 'critical';                    // Out of stock
-  if (item.qty <= item.min) return 'warning';              // At or below minimum
-  if (item.qty <= item.min + 5) return 'warning';          // Within 5 of minimum 
-  return 'ok';                                             // Healthy
-}
+function sStatus(item) { return item.qty === 0 ? 'critical' : item.qty < item.min ? 'warning' : 'ok'; }
 function sLabel(s)     { return s === 'critical' ? 'Critical' : s === 'warning' ? 'Warning' : 'Healthy'; }
 
 /* ═══════════════════════════════════════════
    STOCK STATS RENDER
 ═══════════════════════════════════════════ */
 function renderStockStats(containerId) {
-  // const crit = stock.filter(i => sStatus(i) === 'critical').length;
-  const crit = {{total_out_of_stock}};
-  const warn = {{low_stock_total}};
-  const ok   = {{total_healthy_stock}};
-  const sks  = {{skus}};
+  const crit = stock.filter(i => sStatus(i) === 'critical').length;
+  const warn = stock.filter(i => sStatus(i) === 'warning').length;
+  const ok   = stock.filter(i => sStatus(i) === 'ok').length;
   const el   = document.getElementById(containerId);
   if (!el) return;
   el.innerHTML = `
     <div class="inv-stat s-red"><div class="inv-stat-lbl">Out of Stock</div><div class="inv-stat-val">${crit}</div><div class="inv-stat-sub">Critical — reorder now</div></div>
     <div class="inv-stat s-amber"><div class="inv-stat-lbl">Low Stock</div><div class="inv-stat-val">${warn}</div><div class="inv-stat-sub">Below minimum threshold</div></div>
-    <div class="inv-stat s-blue"><div class="inv-stat-lbl">Total SKUs</div><div class="inv-stat-val">${sks}</div><div class="inv-stat-sub">↑ 12 this week</div></div>
+    <div class="inv-stat s-blue"><div class="inv-stat-lbl">Total SKUs</div><div class="inv-stat-val">${stock.length}</div><div class="inv-stat-sub">↑ 12 this week</div></div>
     <div class="inv-stat s-green"><div class="inv-stat-lbl">Healthy Stock</div><div class="inv-stat-val">${ok}</div><div class="inv-stat-sub">${Math.round(ok/stock.length*100)}% of products</div></div>
   `;
 }
