@@ -7,7 +7,7 @@ from . import forms
 from .forms import Registeruser,Userstore,Productform,Customerform,Billform,Billitemform
 from .models import Bill,Product,Customer
 from django.db.models import F
-from datetime import date
+from datetime import date,timedelta
 from django.utils import timezone
 
 
@@ -77,11 +77,13 @@ class dashboard(LoginRequiredMixin,TemplateView):
         this_month_bills=Bill.objects.filter(store=store,created_at__month=date.month,created_at__year=date.year)
         this_month_revenue=sum(bill.grand_total for bill in this_month_bills)
 
+        
+
         return render(request,self.template_name,context={
             "total_products":total_products,
             "total_customer":total_customer,
             "total_bill":total_bill,
-            "this_month_revenue":this_month_revenue     
+            "this_month_revenue":this_month_revenue,
         })
 
 
@@ -172,6 +174,16 @@ class createbill(LoginRequiredMixin, TemplateView):
             bill = billform.save(commit=False)
             bill.store = request.user.store
             bill.Bill_num = generate_bill_number(request.user.store)
+
+            # bill status
+
+            if "save_draft" in request.POST:
+                bill.bill_status ="Drafts"
+                print(request.POST)
+            elif "create_bill " in request.POST:
+                bill.bill_status ="Finalized"
+                print(request.POST)
+
             bill.save()
             print("BILL SAVED:", bill.id, bill.Bill_num)
 
@@ -202,4 +214,53 @@ class stock_alert(LoginRequiredMixin,TemplateView):
                 'skus':skus
             }
         )
-        
+
+class Allproducts(LoginRequiredMixin, TemplateView):
+
+    template_name = "dashboard.html"
+
+    def get(self, request, *args, **kwargs):
+
+        store = request.user.store
+
+        products = list(
+            Product.objects.filter(store=store).values(
+                "id",
+                "product_code",
+                "product_name",
+                "categories",
+                "current_stock",
+                "minimum_stock",
+                "selling_price",
+                "Tax",
+               
+            )
+        )
+        #   {id:1,  sku:'BHP-204',  name:'Bluetooth Headphones Pro',  category:'Electronics', qty:0,  min:10, price:3499,  lastSold:'Today'},
+
+        return HttpResponse(products)
+
+
+
+
+class src(TemplateView): #original src
+    template_name="dashboard-sor.html"
+    def get(self,request,*args,**kwargs):
+        store=request.user.store
+        total_products=Product.objects.count()
+        total_customer=Customer.objects.count()
+        total_bill=Bill.objects.count()
+
+        # current month revenue
+        date=timezone.now().date()
+        this_month_bills=Bill.objects.filter(store=store,created_at__month=date.month,created_at__year=date.year)
+        this_month_revenue=sum(bill.grand_total for bill in this_month_bills)
+
+        return render(request,self.template_name,context={
+            "total_products":total_products,
+            "total_customer":total_customer,
+            "total_bill":total_bill,
+            "this_month_revenue":this_month_revenue     
+        })
+
+

@@ -3,7 +3,8 @@ from .models import Product,Bill
 from django.db.models import F
 from django.utils import timezone
 from itertools import chain
- 
+from datetime import date,timedelta
+
 
 def all_forms(request):
     if not request.user.is_authenticated:
@@ -51,6 +52,12 @@ def all_forms(request):
 
     #today revenue
     today_revenue=sum(today_revnues.grand_total for today_revnues in today_bills)
+
+    # recent Bills
+    Bills=Bill.objects.filter(store=store,bill_status="Finalized").order_by("-created_at")
+
+    # all products
+    Products=Product.objects.all()
     return {
         "productform": Productform(),
         "customerform": Customerform(),
@@ -86,7 +93,13 @@ def all_forms(request):
         "today_bill_count":today_bill_count,
 
         # today revenue
-        "today_revenue":today_revenue
+        "today_revenue":today_revenue,
 
+        "bills":Bills,
+        "today": timezone.now().date(),
+        "yesterday": timezone.now().date() - timedelta(days=1),
+
+        # all products
+        "all_products":Products
 
     }
