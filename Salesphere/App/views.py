@@ -251,24 +251,4 @@ class Allproducts(LoginRequiredMixin, TemplateView):
 
 
 
-class src(TemplateView): #original src
-    template_name="dashboard-sor.html"
-    def get(self,request,*args,**kwargs):
-        store=request.user.store
-        total_products=Product.objects.count()
-        total_customer=Customer.objects.count()
-        total_bill=Bill.objects.count()
-
-        # current month revenue
-        date=timezone.now().date()
-        this_month_bills=Bill.objects.filter(store=store,created_at__month=date.month,created_at__year=date.year)
-        this_month_revenue=sum(bill.grand_total for bill in this_month_bills)
-
-        return render(request,self.template_name,context={
-            "total_products":total_products,
-            "total_customer":total_customer,
-            "total_bill":total_bill,
-            "this_month_revenue":this_month_revenue     
-        })
-
 
