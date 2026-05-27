@@ -99,13 +99,11 @@ class add_product(LoginRequiredMixin,TemplateView):
     template_name="dashboard.html"
     login_url='/'
     
-
     def get(self,request,*args,**kwargs):
         productform=Productform()
         return render(request,self.template_name,context={
             "active_page":'dashboard',
-            "productform":productform
-           
+            "productform":productform     
         })
 
     def post(self,request,*args,**kwargs):
@@ -171,12 +169,6 @@ class createbill(LoginRequiredMixin, TemplateView):
     def post(self, request, *args, **kwargs):
         billform = Billform(request.POST)
         billitemform = Billitemform(request.POST)
-        
-        # print("POST DATA:", request.POST)
-        # print("BILL VALID:", billform.is_valid())
-        # print("BILL ERRORS:", billform.errors)
-        # print("ITEM VALID:", billitemform.is_valid())
-        # print("ITEM ERRORS:", billitemform.errors)
 
         if billform.is_valid() and billitemform.is_valid():
             bill = billform.save(commit=False)
@@ -224,13 +216,9 @@ class stock_alert(LoginRequiredMixin,TemplateView):
         )
 
 class Allproducts(LoginRequiredMixin, TemplateView):
-
     template_name = "dashboard.html"
-
     def get(self, request, *args, **kwargs):
-
         store = request.user.store
-
         products = list(
             Product.objects.filter(store=store).values(
                 "id",
@@ -240,12 +228,9 @@ class Allproducts(LoginRequiredMixin, TemplateView):
                 "current_stock",
                 "minimum_stock",
                 "selling_price",
-                "Tax",
-               
+                "Tax",    
             )
         )
-        #   {id:1,  sku:'BHP-204',  name:'Bluetooth Headphones Pro',  category:'Electronics', qty:0,  min:10, price:3499,  lastSold:'Today'},
-
         return HttpResponse(products)
 
 

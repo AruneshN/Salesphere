@@ -606,11 +606,6 @@ select.tbl-filter:focus{border-color:var(--accent)}
                 </td></tr>
                 {% endif %}
             {% endfor %}
-            <!-- <tr><td><span class="bill-no">#SS-1031</span></td><td>Ravi Kumar</td><td style="color:var(--text-muted)">Today, 4:12 pm</td><td style="font-family:var(--mono);font-weight:600">₹3,200</td><td><span class="status-pill s-paid">Paid</span></td></tr>
-            <tr><td><span class="bill-no">#SS-1030</span></td><td>Meena Textiles</td><td style="color:var(--text-muted)">Today, 1:45 pm</td><td style="font-family:var(--mono);font-weight:600">₹8,750</td><td><span class="status-pill s-pending">Pending</span></td></tr>
-            <tr><td><span class="bill-no">#SS-1029</span></td><td>Anand Stores</td><td style="color:var(--text-muted)">Today, 11:20 am</td><td style="font-family:var(--mono);font-weight:600">₹560</td><td><span class="status-pill s-paid">Paid</span></td></tr>
-            <tr><td><span class="bill-no">#SS-1028</span></td><td>Kavitha Electronics</td><td style="color:var(--text-muted)">Yesterday</td><td style="font-family:var(--mono);font-weight:600">₹12,400</td><td><span class="status-pill s-paid">Paid</span></td></tr>
-            <tr><td><span class="bill-no">#SS-1027</span></td><td>Selvam Traders</td><td style="color:var(--text-muted)">Yesterday</td><td style="font-family:var(--mono);font-weight:600">₹1,890</td><td><span class="status-pill s-overdue">Overdue</span></td></tr> -->
           </tbody>
         </table>
       </div>
@@ -926,38 +921,12 @@ select.tbl-filter:focus{border-color:var(--accent)}
       <div class="stock-section">
         <div class="stock-section-header">
           <div>
-            <!-- <div class="stock-section-title">All Stock</div> -->
-            <!-- <div class="stock-section-sub">Complete inventory — search, filter, edit &amp; delete</div> -->
           </div>
           <button class="btn btn-ghost btn-sm" onclick="exportCSV()">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="13" height="13"><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
             Export CSV
           </button>
         </div>
-        <!-- <div class="table-toolbar">
-          <div class="search-wrap">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
-            <input type="text" id="searchInput" placeholder="Search by name or SKU…" oninput="renderStockTable()">
-          </div>
-          <select class="tbl-filter" id="catFilter" onchange="renderStockTable()">
-            <option value="">All categories</option>
-            <option>Electronics</option>
-            <option>Accessories</option>
-            <option>Peripherals</option>
-            <option>Storage</option>
-          </select>
-          <select class="tbl-filter" id="statusFilter" onchange="renderStockTable()">
-            <option value="">All statuses</option>
-            <option value="critical">Critical</option>
-            <option value="warning">Warning</option>
-            <option value="ok">Healthy</option>
-          </select>
-          <select class="tbl-filter" id="perPageSel" onchange="ppChange()">
-            <option value="8">8 per page</option>
-            <option value="15">15 per page</option>
-            <option value="30">30 per page</option>
-          </select>
-        </div> -->
         <div class="table-toolbar" style="display:flex;align-items:center;gap:10px;flex-wrap:nowrap;">
   <div class="search-wrap" style="flex:1;min-width:0;">
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
@@ -1495,19 +1464,26 @@ let chartInst;
 //   });
 // }
 
+
 function initChart() {
   const canvas = document.getElementById('salesChart');
   if (!canvas) return;
   if (chartInst) chartInst.destroy();
-  const vals = {{week_sales_data}};
+
+  const vals   = {{ week_sales_data|safe|default:"[]" }};
+  const labels = {{ chart_labels|safe|default:"['Mon','Tue','Wed','Thu','Fri','Sat','Sun']" }};
+  if (!vals.length) return;
+
+  const peak = vals.indexOf(Math.max(...vals));
+
   chartInst = new Chart(canvas, {
     type: 'bar',
     data: {
-      labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+      labels: labels,
       datasets: [{
-        label:'Revenue (₹)', data:vals,
-        backgroundColor: vals.map((_,i)=>i===3?'#2563ff':'rgba(37,99,255,0.15)'),
-        borderColor:     vals.map((_,i)=>i===3?'#1d50e0':'rgba(37,99,255,0.4)'),
+        label: 'Revenue (₹)', data: vals,
+        backgroundColor: vals.map((_,i) => i===peak ? '#2563ff' : 'rgba(37,99,255,0.15)'),
+        borderColor:     vals.map((_,i) => i===peak ? '#1d50e0' : 'rgba(37,99,255,0.4)'),
         borderWidth:1.5, borderRadius:6, borderSkipped:false
       }]
     },
