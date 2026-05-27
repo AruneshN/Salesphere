@@ -1,5 +1,5 @@
 from django.shortcuts import render,redirect
-from django.http import HttpResponse
+from django.http import HttpResponse,JsonResponse
 from django.views.generic import TemplateView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import authenticate,login,logout
@@ -77,13 +77,21 @@ class dashboard(LoginRequiredMixin,TemplateView):
         this_month_bills=Bill.objects.filter(store=store,created_at__month=date.month,created_at__year=date.year)
         this_month_revenue=sum(bill.grand_total for bill in this_month_bills)
 
-        
-
+        # dashboard chart
+        last_seven_days = timezone.now() - timedelta(days=7)
+        week_data=Bill.objects.filter(created_at__gte=last_seven_days)
+        data=[]
+        for i in week_data:
+            data.append(float(i.grand_total))
         return render(request,self.template_name,context={
             "total_products":total_products,
             "total_customer":total_customer,
             "total_bill":total_bill,
             "this_month_revenue":this_month_revenue,
+            "week_sales_data":data,
+            "week_total_amount": sum(data),
+            "peek_day":max(data),
+            "Avg_day":min(data)
         })
 
 

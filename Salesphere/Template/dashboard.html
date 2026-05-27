@@ -543,9 +543,9 @@ select.tbl-filter:focus{border-color:var(--accent)}
         <div class="card-header">
           <div><div class="card-title">Sales trend</div><div class="card-sub">Last 7 days · Daily revenue (₹)</div></div>
           <div style="display:flex;gap:24px">
-            <div style="text-align:right"><div style="font-size:10px;color:var(--text-muted)">Week total</div><div style="font-family:var(--mono);font-weight:600;font-size:13px">₹80,250</div></div>
-            <div style="text-align:right"><div style="font-size:10px;color:var(--text-muted)">Peak day</div><div style="font-family:var(--mono);font-weight:600;font-size:13px">₹14,300</div></div>
-            <div style="text-align:right"><div style="font-size:10px;color:var(--text-muted)">Avg/day</div><div style="font-family:var(--mono);font-weight:600;font-size:13px">₹11,464</div></div>
+            <div style="text-align:right"><div style="font-size:10px;color:var(--text-muted)">Week total</div><div style="font-family:var(--mono);font-weight:600;font-size:13px">₹{{week_total_amount}}</div></div>
+            <div style="text-align:right"><div style="font-size:10px;color:var(--text-muted)">Peak day</div><div style="font-family:var(--mono);font-weight:600;font-size:13px">₹{{peek_day}}</div></div>
+            <div style="text-align:right"><div style="font-size:10px;color:var(--text-muted)">Avg/day</div><div style="font-family:var(--mono);font-weight:600;font-size:13px">₹{{Avg_day}}</div></div>
           </div>
         </div>
         <div class="chart-wrap"><canvas id="salesChart"></canvas></div>
@@ -1468,11 +1468,38 @@ function toast(msg) { showToast(msg, false); } // legacy alias
    CHART
 ═══════════════════════════════════════════ */
 let chartInst;
+// function initChart() {
+//   const canvas = document.getElementById('salesChart');
+//   if (!canvas) return;
+//   if (chartInst) chartInst.destroy();
+//   const vals = [8400,11200,9800,14300,10500,13600,12450];
+//   chartInst = new Chart(canvas, {
+//     type: 'bar',
+//     data: {
+//       labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+//       datasets: [{
+//         label:'Revenue (₹)', data:vals,
+//         backgroundColor: vals.map((_,i)=>i===3?'#2563ff':'rgba(37,99,255,0.15)'),
+//         borderColor:     vals.map((_,i)=>i===3?'#1d50e0':'rgba(37,99,255,0.4)'),
+//         borderWidth:1.5, borderRadius:6, borderSkipped:false
+//       }]
+//     },
+//     options:{
+//       responsive:true, maintainAspectRatio:false,
+//       plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'₹'+ctx.raw.toLocaleString('en-IN')}}},
+//       scales:{
+//         x:{grid:{display:false},ticks:{font:{size:11},color:'#7a7a85'}},
+//         y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#7a7a85',callback:v=>'₹'+(v/1000).toFixed(0)+'k'}}
+//       }
+//     }
+//   });
+// }
+
 function initChart() {
   const canvas = document.getElementById('salesChart');
   if (!canvas) return;
   if (chartInst) chartInst.destroy();
-  const vals = [8400,11200,9800,14300,10500,13600,12450];
+  const vals = {{week_sales_data}};
   chartInst = new Chart(canvas, {
     type: 'bar',
     data: {
@@ -1494,6 +1521,7 @@ function initChart() {
     }
   });
 }
+
 </script>
 </body>
 </html>

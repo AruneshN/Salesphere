@@ -1,0 +1,352 @@
+
+<h2 class="sr-only">Invoice Settlement — searchable, filterable table of open invoices with settlement actions</h2>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.wrap{padding:0 0 1.5rem;font-size:13px}
+.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:1rem;flex-wrap:nowrap}
+.search-box{position:relative;flex:1;min-width:0}
+.search-box i{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--color-text-secondary);pointer-events:none}
+.search-box input{width:100%;padding:7px 10px 7px 32px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;outline:none}
+.search-box input:focus{border-color:var(--color-border-primary);box-shadow:0 0 0 3px rgba(55,138,221,0.1)}
+.search-box input::placeholder{color:var(--color-text-tertiary)}
+select.flt{padding:7px 10px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;outline:none;flex-shrink:0;cursor:pointer}
+select.flt:focus{border-color:var(--color-border-primary)}
+.tbl-wrap{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+thead tr{background:var(--color-background-secondary)}
+th{padding:10px 14px;text-align:left;font-size:11px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.6px;border-bottom:0.5px solid var(--color-border-tertiary);cursor:pointer;user-select:none;white-space:nowrap}
+th:hover{color:var(--color-text-primary)}
+th .si{margin-left:3px;opacity:0.4;font-size:10px}
+th.act-th{cursor:default}
+tbody tr{border-bottom:0.5px solid var(--color-border-tertiary);transition:background 0.1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--color-background-secondary)}
+td{padding:11px 14px;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.inv-no{font-family:var(--font-mono);font-size:11px;color:#378ADD;background:#E6F1FB;padding:3px 7px;border-radius:5px;border:0.5px solid #B5D4F4;display:inline-block}
+.cname{font-weight:500;color:var(--color-text-primary);font-size:13px}
+.ctype{font-size:11px;color:var(--color-text-secondary);margin-top:2px}
+.amt{font-family:var(--font-mono);font-weight:500;font-size:13px;color:var(--color-text-primary)}
+.bal{font-family:var(--font-mono);font-weight:500;font-size:13px}
+.bal.full{color:#639922}
+.bal.partial{color:#BA7517}
+.bal.zero{color:#E24B4A}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;display:block}
+.b-paid{background:#EAF3DE;color:#3B6D11}.b-paid::before{background:#639922}
+.b-partial{background:#FAEEDA;color:#854F0B}.b-partial::before{background:#BA7517}
+.b-pending{background:#E6F1FB;color:#185FA5}.b-pending::before{background:#378ADD}
+.b-overdue{background:#FCEBEB;color:#A32D2D}.b-overdue::before{background:#E24B4A}
+.act-cell{display:flex;gap:6px;align-items:center}
+.ibtn{height:28px;padding:0 10px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);background:transparent;color:var(--color-text-secondary);font-size:12px;cursor:pointer;display:inline-flex;align-items:center;gap:4px;white-space:nowrap;transition:all 0.12s}
+.ibtn:hover{background:var(--color-background-secondary);color:var(--color-text-primary)}
+.ibtn.settle{border-color:#B5D4F4;color:#185FA5;background:#E6F1FB}
+.ibtn.settle:hover{background:#B5D4F4;color:#0C447C}
+.ibtn.view{border-color:var(--color-border-secondary)}
+.footer{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-top:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);font-size:12px;color:var(--color-text-secondary)}
+.pag{display:flex;gap:4px}
+.pb{min-width:28px;height:28px;padding:0 6px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);background:transparent;color:var(--color-text-primary);font-size:12px;cursor:pointer;transition:all 0.12s}
+.pb:hover:not(:disabled):not(.active){background:var(--color-background-primary)}
+.pb:disabled{opacity:0.35;cursor:default}
+.pb.active{background:#378ADD;border-color:#378ADD;color:#fff}
+.due-ok{color:var(--color-text-secondary);font-size:12px}
+.due-warn{color:#BA7517;font-size:12px;font-weight:500}
+.due-over{color:#E24B4A;font-size:12px;font-weight:500}
+.prog-wrap{width:60px;height:4px;background:var(--color-border-tertiary);border-radius:3px;display:inline-block;vertical-align:middle;margin-left:6px}
+.prog-bar{height:4px;border-radius:3px}
+.settle-panel{display:none;background:var(--color-background-secondary);border-top:0.5px solid var(--color-border-tertiary);padding:16px 14px}
+.settle-panel.open{display:block}
+.sp-grid{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+.sp-field{display:flex;flex-direction:column;gap:4px}
+.sp-field label{font-size:11px;color:var(--color-text-secondary);font-weight:500;text-transform:uppercase;letter-spacing:0.5px}
+.sp-field input,.sp-field select{padding:6px 9px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;outline:none;width:100%}
+.sp-field input:focus,.sp-field select:focus{border-color:#378ADD;box-shadow:0 0 0 2px rgba(55,138,221,0.12)}
+.sp-summary{display:flex;align-items:center;justify-content:space-between;padding:10px 12px;background:var(--color-background-primary);border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);margin-bottom:10px}
+.sp-sum-item{display:flex;flex-direction:column;align-items:center;gap:2px}
+.sp-sum-lbl{font-size:10px;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.5px}
+.sp-sum-val{font-family:var(--font-mono);font-size:13px;font-weight:500;color:var(--color-text-primary)}
+.sp-sum-val.highlight{color:#185FA5}
+.sp-sum-val.green{color:#3B6D11}
+.sp-actions{display:flex;gap:8px;justify-content:flex-end}
+.btn-cancel{padding:6px 14px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);background:transparent;color:var(--color-text-secondary);font-size:12px;cursor:pointer}
+.btn-cancel:hover{background:var(--color-background-primary)}
+.btn-confirm{padding:6px 14px;border-radius:var(--border-radius-md);border:0.5px solid #B5D4F4;background:#378ADD;color:#fff;font-size:12px;cursor:pointer;font-weight:500}
+.btn-confirm:hover{background:#185FA5}
+.status-live{display:inline-flex;align-items:center;gap:4px;font-size:12px;font-weight:500;padding:2px 8px;border-radius:20px}
+</style>
+
+<div class="wrap">
+  <div class="toolbar">
+    <div class="search-box">
+      <i class="ti ti-search" aria-hidden="true"></i>
+      <input type="text" id="srch" placeholder="Search by invoice no. or customer..." oninput="render()">
+    </div>
+    <select class="flt" id="statusFlt" onchange="render()">
+      <option value="">All statuses</option>
+      <option value="Pending">Pending</option>
+      <option value="Partial">Partial</option>
+      <option value="Overdue">Overdue</option>
+      <option value="Paid">Paid</option>
+    </select>
+    <select class="flt" id="ppFlt" onchange="ppCh()">
+      <option value="6">6 per page</option>
+      <option value="10">10 per page</option>
+      <option value="20">20 per page</option>
+    </select>
+  </div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th style="width:110px" onclick="sortBy('inv')">Invoice <span class="si" id="ss-inv">↕</span></th>
+          <th style="width:170px" onclick="sortBy('cust')">Customer <span class="si" id="ss-cust">↕</span></th>
+          <th style="width:95px" onclick="sortBy('date')">Due date <span class="si" id="ss-date">↕</span></th>
+          <th style="width:100px" onclick="sortBy('total')">Total <span class="si" id="ss-total">↕</span></th>
+          <th style="width:100px" onclick="sortBy('paid')">Paid <span class="si" id="ss-paid">↕</span></th>
+          <th style="width:100px" onclick="sortBy('bal')">Balance <span class="si" id="ss-bal">↕</span></th>
+          <th style="width:90px">Status</th>
+          <th style="width:130px" class="act-th">Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div id="settlePanel" class="settle-panel"></div>
+    <div class="footer">
+      <span id="pgInfo"></span>
+      <div class="pag" id="pagBtns"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const invoices = [
+  {id:1, inv:'#SS-1031', cust:'Ravi Kumar',       type:'Retail',   due:'2026-05-20', total:5000,  paid:0,    method:'UPI'},
+  {id:2, inv:'#SS-1030', cust:'Meena Textiles',   type:'Business', due:'2026-05-15', total:8750,  paid:3500, method:'Bank Transfer'},
+  {id:3, inv:'#SS-1029', cust:'Anand Stores',     type:'Wholesale',due:'2026-06-01', total:560,   paid:560,  method:'Cash'},
+  {id:4, inv:'#SS-1028', cust:'Kavitha Electronics',type:'Business',due:'2026-04-30',total:12400, paid:5000, method:'Cheque'},
+  {id:5, inv:'#SS-1027', cust:'Selvam Traders',   type:'Wholesale',due:'2026-04-25', total:1890,  paid:0,    method:'UPI'},
+  {id:6, inv:'#SS-1026', cust:'Priya Fashions',   type:'Retail',   due:'2026-05-28', total:3200,  paid:1600, method:'Cash'},
+  {id:7, inv:'#SS-1025', cust:'Kumar Hardware',   type:'Business', due:'2026-05-10', total:7450,  paid:0,    method:'Bank Transfer'},
+  {id:8, inv:'#SS-1024', cust:'Nair Distributors',type:'Wholesale',due:'2026-06-05', total:15200, paid:15200,method:'UPI'},
+  {id:9, inv:'#SS-1023', cust:'Lakshmi Stores',   type:'Retail',   due:'2026-04-18', total:920,   paid:0,    method:'Cash'},
+  {id:10,inv:'#SS-1022', cust:'Sri Balaji Traders',type:'Business',due:'2026-05-30', total:4600,  paid:2000, method:'Cheque'},
+];
+
+const today = new Date('2026-05-27');
+
+function status(inv) {
+  if (inv.paid >= inv.total) return 'Paid';
+  const due = new Date(inv.due);
+  if (inv.paid > 0) return 'Partial';
+  if (due < today) return 'Overdue';
+  return 'Pending';
+}
+
+function daysLabel(dueStr) {
+  const due = new Date(dueStr);
+  const diff = Math.round((due - today) / 86400000);
+  if (diff < 0) return {txt: Math.abs(diff)+'d overdue', cls:'due-over'};
+  if (diff === 0) return {txt:'Due today', cls:'due-warn'};
+  if (diff <= 7) return {txt:'Due in '+diff+'d', cls:'due-warn'};
+  return {txt: due.toLocaleDateString('en-IN',{day:'2-digit',month:'short'}), cls:'due-ok'};
+}
+
+function badgeCls(s) {
+  return s==='Paid'?'b-paid':s==='Partial'?'b-partial':s==='Overdue'?'b-overdue':'b-pending';
+}
+
+let sortKey='date', sortAsc=true, page=1, pp=6, openId=null;
+
+function filtered() {
+  const q = document.getElementById('srch').value.toLowerCase();
+  const sf = document.getElementById('statusFlt').value;
+  return invoices.filter(i =>
+    (!q || i.inv.toLowerCase().includes(q) || i.cust.toLowerCase().includes(q)) &&
+    (!sf || status(i) === sf)
+  ).sort((a,b) => {
+    const map = {inv:'inv',cust:'cust',date:'due',total:'total',paid:'paid',bal:'bal'};
+    let va, vb;
+    if (sortKey==='bal') { va=a.total-a.paid; vb=b.total-b.paid; }
+    else if (sortKey==='date') { va=a.due; vb=b.due; }
+    else { va=a[{inv:'inv',cust:'cust',total:'total',paid:'paid'}[sortKey]||sortKey]; vb=b[{inv:'inv',cust:'cust',total:'total',paid:'paid'}[sortKey]||sortKey]; }
+    if (typeof va==='string') { va=va.toLowerCase(); vb=vb.toLowerCase(); }
+    return sortAsc?(va>vb?1:-1):(va<vb?1:-1);
+  });
+}
+
+function fmt(n) { return '₹'+n.toLocaleString('en-IN'); }
+
+function render() {
+  const data = filtered();
+  const total = data.length;
+  const pages = Math.max(1, Math.ceil(total/pp));
+  if (page > pages) page = pages;
+  const slice = data.slice((page-1)*pp, page*pp);
+
+  document.getElementById('tbody').innerHTML = slice.map(inv => {
+    const s = status(inv);
+    const bal = inv.total - inv.paid;
+    const pct = Math.round((inv.paid/inv.total)*100);
+    const dl = daysLabel(inv.due);
+    const balCls = bal===0?'zero':pct>0?'partial':'full';
+    const settled = openId === inv.id;
+    return `<tr id="row-${inv.id}">
+      <td><span class="inv-no">${inv.inv}</span></td>
+      <td><div class="cname">${inv.cust}</div><div class="ctype">${inv.type}</div></td>
+      <td><span class="${dl.cls}">${dl.txt}</span></td>
+      <td><span class="amt">${fmt(inv.total)}</span></td>
+      <td><span class="amt">${fmt(inv.paid)}<span class="prog-wrap"><span class="prog-bar" style="width:${pct}%;background:${pct===100?'#639922':pct>0?'#BA7517':'#B5D4F4'}"></span></span></span></td>
+      <td><span class="bal ${balCls}">${fmt(bal)}</span></td>
+      <td><span class="badge ${badgeCls(s)}">${s}</span></td>
+      <td><div class="act-cell">
+        ${s!=='Paid'?`<button class="ibtn settle" onclick="toggleSettle(${inv.id})"><i class="ti ti-coins" aria-hidden="true"></i>${settled?'Cancel':'Settle'}</button>`:'<span style="font-size:11px;color:var(--color-text-tertiary)">Closed</span>'}
+        <button class="ibtn view" onclick="viewInv('${inv.inv}')"><i class="ti ti-eye" aria-hidden="true"></i></button>
+      </div></td>
+    </tr>`;
+  }).join('');
+
+  const sp = document.getElementById('settlePanel');
+  if (openId && slice.find(i=>i.id===openId)) {
+    const inv = invoices.find(i=>i.id===openId);
+    sp.classList.add('open');
+    sp.innerHTML = buildPanel(inv);
+    sp.querySelectorAll('input,select').forEach(el => el.addEventListener('input', updateSummary));
+    updateSummary();
+  } else {
+    sp.classList.remove('open');
+    sp.innerHTML = '';
+  }
+
+  const start = total===0?0:(page-1)*pp+1;
+  document.getElementById('pgInfo').textContent = `Showing ${start}–${Math.min(page*pp,total)} of ${total} invoices`;
+
+  let btns = `<button class="pb" onclick="gp(${page-1})" ${page===1?'disabled':''}>← Prev</button>`;
+  for (let p=1;p<=pages;p++) {
+    if (pages<=7 || Math.abs(p-page)<=1 || p===1 || p===pages)
+      btns += `<button class="pb${p===page?' active':''}" onclick="gp(${p})">${p}</button>`;
+    else if (Math.abs(p-page)===2) btns += `<span style="padding:0 2px;color:var(--color-text-tertiary)">…</span>`;
+  }
+  btns += `<button class="pb" onclick="gp(${page+1})" ${page===pages?'disabled':''}>Next →</button>`;
+  document.getElementById('pagBtns').innerHTML = btns;
+
+  ['inv','cust','date','total','paid','bal'].forEach(k => {
+    const el = document.getElementById('ss-'+k);
+    if (!el) return;
+    el.parentElement.classList.toggle('active-sort', sortKey===k);
+    el.textContent = sortKey===k?(sortAsc?'↑':'↓'):'↕';
+  });
+}
+
+function buildPanel(inv) {
+  const bal = inv.total - inv.paid;
+  const today_str = today.toISOString().split('T')[0];
+  return `
+  <div style="margin-bottom:10px;font-size:12px;color:var(--color-text-secondary)">
+    Settling <strong style="color:var(--color-text-primary)">${inv.inv}</strong> — ${inv.cust} &nbsp;·&nbsp; Balance due: <strong style="color:#E24B4A">${fmt(bal)}</strong>
+  </div>
+  <div class="sp-grid">
+    <div class="sp-field">
+      <label>Amount to collect</label>
+      <input type="number" id="sp-amt" value="${bal}" max="${bal}" min="0" placeholder="0.00">
+    </div>
+    <div class="sp-field">
+      <label>Payment method</label>
+      <select id="sp-method">
+        <option>Cash</option><option>UPI</option><option>Bank Transfer</option><option>Cheque</option><option>Card</option>
+      </select>
+    </div>
+    <div class="sp-field">
+      <label>Reference no.</label>
+      <input type="text" id="sp-ref" placeholder="UPI ID / UTR / Cheque no.">
+    </div>
+    <div class="sp-field">
+      <label>Settlement date</label>
+      <input type="date" id="sp-date" value="${today_str}">
+    </div>
+    <div class="sp-field">
+      <label>Advance to apply</label>
+      <input type="number" id="sp-adv" value="0" min="0" placeholder="0">
+    </div>
+    <div class="sp-field">
+      <label>Credit note</label>
+      <input type="number" id="sp-cn" value="0" min="0" placeholder="0">
+    </div>
+    <div class="sp-field">
+      <label>Discount / writeoff</label>
+      <input type="number" id="sp-disc" value="0" min="0" placeholder="0">
+    </div>
+    <div class="sp-field">
+      <label>Notes</label>
+      <input type="text" id="sp-notes" placeholder="Optional remark">
+    </div>
+  </div>
+  <div class="sp-summary" id="sp-sum-row">
+    <div class="sp-sum-item"><span class="sp-sum-lbl">Balance due</span><span class="sp-sum-val">${fmt(bal)}</span></div>
+    <span style="color:var(--color-text-tertiary);font-size:16px">−</span>
+    <div class="sp-sum-item"><span class="sp-sum-lbl">Collected</span><span class="sp-sum-val highlight" id="sum-col">${fmt(bal)}</span></div>
+    <span style="color:var(--color-text-tertiary);font-size:16px">=</span>
+    <div class="sp-sum-item"><span class="sp-sum-lbl">Remaining</span><span class="sp-sum-val" id="sum-rem">${fmt(0)}</span></div>
+    <div style="height:28px;width:0.5px;background:var(--color-border-tertiary)"></div>
+    <div class="sp-sum-item"><span class="sp-sum-lbl">Status after</span><span id="sum-status"></span></div>
+  </div>
+  <div class="sp-actions">
+    <button class="btn-cancel" onclick="cancelSettle()">Cancel</button>
+    <button class="btn-confirm" onclick="confirmSettle(${inv.id})"><i class="ti ti-check" aria-hidden="true" style="font-size:13px;margin-right:4px"></i>Confirm settlement</button>
+  </div>`;
+}
+
+function updateSummary() {
+  const inv = invoices.find(i=>i.id===openId); if (!inv) return;
+  const bal = inv.total - inv.paid;
+  const amt = parseFloat(document.getElementById('sp-amt')?.value)||0;
+  const adv = parseFloat(document.getElementById('sp-adv')?.value)||0;
+  const cn  = parseFloat(document.getElementById('sp-cn')?.value)||0;
+  const disc= parseFloat(document.getElementById('sp-disc')?.value)||0;
+  const total = amt + adv + cn + disc;
+  const rem = Math.max(0, bal - total);
+  const col = document.getElementById('sum-col');
+  const remEl = document.getElementById('sum-rem');
+  const stEl = document.getElementById('sum-status');
+  if (col) col.textContent = fmt(Math.round(total));
+  if (remEl) { remEl.textContent = fmt(Math.round(rem)); remEl.style.color = rem===0?'#3B6D11':rem<bal?'#BA7517':'#E24B4A'; }
+  if (stEl) {
+    if (rem === 0) stEl.innerHTML = '<span class="badge b-paid">Paid</span>';
+    else if (total > 0) stEl.innerHTML = '<span class="badge b-partial">Partial</span>';
+    else stEl.innerHTML = '<span class="badge b-pending">Pending</span>';
+  }
+}
+
+function toggleSettle(id) {
+  openId = openId===id ? null : id;
+  render();
+  if (openId) {
+    const panel = document.getElementById('settlePanel');
+    if (panel) setTimeout(()=>panel.scrollIntoView({behavior:'smooth',block:'nearest'}), 50);
+  }
+}
+
+function cancelSettle() { openId=null; render(); }
+
+function confirmSettle(id) {
+  const inv = invoices.find(i=>i.id===id); if (!inv) return;
+  const amt  = parseFloat(document.getElementById('sp-amt')?.value)||0;
+  const adv  = parseFloat(document.getElementById('sp-adv')?.value)||0;
+  const cn   = parseFloat(document.getElementById('sp-cn')?.value)||0;
+  const disc = parseFloat(document.getElementById('sp-disc')?.value)||0;
+  const total = amt + adv + cn + disc;
+  const bal = inv.total - inv.paid;
+  if (total > bal + 0.01) { alert('Amount exceeds balance due of '+fmt(bal)); return; }
+  inv.paid = Math.min(inv.paid + total, inv.total);
+  openId = null;
+  render();
+}
+
+function viewInv(no) { alert('View invoice '+no+' — wire to your Django detail view'); }
+function cancelSettle2() { openId=null; render(); }
+function sortBy(k) { if(sortKey===k) sortAsc=!sortAsc; else{sortKey=k;sortAsc=true;} page=1; render(); }
+function gp(p) { page=p; render(); }
+function ppCh() { pp=parseInt(document.getElementById('ppFlt').value); page=1; render(); }
+
+render();
+</script>
