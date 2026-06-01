@@ -58,6 +58,20 @@ def all_forms(request):
 
     # all products
     Products=Product.objects.all()
+
+    total_bill=Bill.objects.exclude(bill_status__in=["Draft","Cancelled"]) #total bills without draft and canceled
+    total_inv_amt=sum([total.grand_total for total in total_bill])#overall invoices amount
+    inv_collected_amt=sum([collected_amt.paid_amount for collected_amt in total_bill]) #total collected invoice amounts
+    unpaid_inv=len([
+            unpaid_bill for unpaid_bill in total_bill
+            if unpaid_bill.paid_amount <= unpaid_bill.grand_total
+            
+        ])# unpaid number of invoices
+    unpaid_inv_amt=sum([
+            unpaid_bill.grand_total for unpaid_bill in total_bill
+            if unpaid_bill.paid_amount <= unpaid_bill.grand_total           
+        ])# unpaid invoices amount
+
     return {
         "productform": Productform(),
         "customerform": Customerform(),
@@ -100,6 +114,11 @@ def all_forms(request):
         "yesterday": timezone.now().date() - timedelta(days=1),
 
         # all products
-        "all_products":Products
+        "all_products":Products,
+
+         "total_inv_amt":total_inv_amt,
+        "Collected_amt":inv_collected_amt,
+        "unpaid_invoice":unpaid_inv,
+        "unpaid_inv_amt":unpaid_inv_amt
 
     }

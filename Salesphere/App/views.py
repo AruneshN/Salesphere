@@ -176,11 +176,10 @@ class createbill(LoginRequiredMixin, TemplateView):
             bill.Bill_num = generate_bill_number(request.user.store)
 
             # bill status
-
             if "save_draft" in request.POST:
                 bill.bill_status ="Drafts"
                 print(request.POST)
-            elif "create_bill " in request.POST:
+            elif "create_bill" in request.POST:
                 bill.bill_status ="Finalized"
                 print(request.POST)
 
@@ -190,6 +189,13 @@ class createbill(LoginRequiredMixin, TemplateView):
             billitem = billitemform.save(commit=False)
             billitem.bill = bill
             billitem.save()
+
+
+            # product stock update after sell
+            stock=Product.objects.get(id=billitem.product.id)
+            stock.current_stock -=billitem.quantity
+            stock.save()
+
             print("ITEM SAVED:", billitem.id)
             return redirect('dashboard')
 
@@ -233,7 +239,7 @@ class Allproducts(LoginRequiredMixin, TemplateView):
         )
         return HttpResponse(products)
 
-
+# payments
 class payment(LoginRequiredMixin, TemplateView):
     
     template_name="dashboard.html"
@@ -244,8 +250,23 @@ class payment(LoginRequiredMixin, TemplateView):
     paid_amount__gt=0,  
 ).select_related('customer').order_by('due_date')
         
+        # total bill amount
+
+        total_bill=Bill.objects.exclude(bill_status__in=["Draft","Cancelled"]) #total bills without draft and canceled
+        total_inv_amt=sum([total.grand_total for total in total_bill])#overall invoices amount
+        inv_collected_amt=sum([collected_amt.paid_amount for collected_amt in total_bill]) #total collected invoice amounts
+        unpaid_inv=len([
+            unpaid_bill for unpaid_bill in total_bill
+            if unpaid_bill.paid_amount <= unpaid_bill.grand_total
+            
+        ])# unpaid number of invoices
+
+
         return render(request,self.template_name,context=
                       {
-                          "bills":pending_bills
+                          "bills":pending_bills,
+                          "total_inv_amt":total_inv_amt,
+                          "Collected_amt":inv_collected_amt,
+                          "unpaid_invoice":unpaid_inv
                       })
 

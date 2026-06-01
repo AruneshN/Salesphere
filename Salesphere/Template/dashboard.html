@@ -836,8 +836,8 @@ td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:ellipsi
     <div class="stats-row">
       <div class="stat-mini"><div class="stat-mini-label">Revenue Today</div><div class="stat-mini-value">{{today_revenue}}</div><div class="stat-mini-sub up">↑ 18% vs yesterday</div></div>
       <div class="stat-mini"><div class="stat-mini-label">Bills Today</div><div class="stat-mini-value">{{today_bill_count}}</div><div class="stat-mini-sub up">↑ 3 more than avg</div></div>
-      <div class="stat-mini"><div class="stat-mini-label">Collected</div><div class="stat-mini-value">₹9,210</div><div class="stat-mini-sub" style="color:var(--text-muted)">74% collection rate</div></div>
-      <div class="stat-mini"><div class="stat-mini-label">Pending</div><div class="stat-mini-value" style="color:var(--warning)">₹3,240</div><div class="stat-mini-sub down">2 bills unpaid</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Collected</div><div class="stat-mini-value">{{Collected_amt}}</div><div class="stat-mini-sub" style="color:var(--text-muted)">74% collection rate</div></div>
+      <div class="stat-mini"><div class="stat-mini-label">Pending</div><div class="stat-mini-value" style="color:var(--warning)">{{unpaid_inv_amt}}</div><div class="stat-mini-sub down">{{unpaid_invoice}} bills unpaid</div></div>
     </div>
     <div class="sec-card">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:20px">
@@ -889,7 +889,7 @@ td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:ellipsi
         <div class="form-actions">
           <button class="btn btn-ghost" type="button" onclick="showToast('📋 Saved as draft')" name="save_draft">Save Draft</button>
           <button class="btn btn-ghost" type="button" onclick="showToast('👁️ Preview generated')">Preview</button>
-          <button class="btn btn-primary" type="submit" name="create_bill">🧾 Create Bill</button>
+          <button class="btn btn-primary" type="submit" name="create_bill" onclick="showToast('✅ Customer added successfully!')" >🧾 Create Bill</button>
         </div>
       </form>
     </div>
@@ -1346,7 +1346,6 @@ window.addEventListener('DOMContentLoaded', function () {
   if (path.includes('create_bill'))  activePage = 'bills';
   if (path.includes('stock_alert'))  activePage = 'inventory';
   if (path.includes('dashboard'))    activePage = 'dashboard';
-  // payment add 
   if (path.includes('payments'))    activePage = 'payments';
 
   // show correct page
@@ -1795,12 +1794,12 @@ function payBadgeCls(s){return s==='Paid'?'b-paid':s==='Partial'?'b-partial':s==
 function payMthOpts(sel){return PAY_METHODS.map(m=>`<option${m===sel?' selected':''}>${m}</option>`).join('')}
 
 function payRenderKPI(){
-  const total=payData.reduce((a,r)=>a+r.total,0);
-  const collected=payData.reduce((a,r)=>a+r.paid,0);
+   const total="{{total_inv_amt|escapejs}}";
+  const collected="{{Collected_amt|escapejs}}";
   const outstanding=total-collected;
   const overdue=payData.filter(r=>payCalcS(r)==='Overdue').reduce((a,r)=>a+(r.total-r.paid),0);
   document.getElementById('kpiRow').innerHTML=`
-    <div class="kpi"><div class="kpi-lbl">Total Outstanding</div><div class="kpi-val" style="font-size:18px;color:var(--danger)">${payFmt(outstanding)}</div><div class="kpi-sub warn">${payData.filter(r=>payCalcS(r)!=='Paid').length} unpaid invoices</div></div>
+    <div class="kpi"><div class="kpi-lbl">Total Outstanding</div><div class="kpi-val" style="font-size:18px;color:var(--danger)">${payFmt(outstanding)}</div><div class="kpi-sub warn">{{unpaid_invoice}} unpaid invoices</div></div>
     <div class="kpi"><div class="kpi-lbl">Collected</div><div class="kpi-val" style="font-size:18px;color:var(--success)">${payFmt(collected)}</div><div class="kpi-sub up">${Math.round(collected/total*100)}% collection rate</div></div>
     <div class="kpi"><div class="kpi-lbl">Overdue</div><div class="kpi-val" style="font-size:18px;color:var(--danger)">${payFmt(overdue)}</div><div class="kpi-sub" style="color:var(--muted)">${payData.filter(r=>payCalcS(r)==='Overdue').length} invoices overdue</div></div>
     <div class="kpi"><div class="kpi-lbl">Total Billed</div><div class="kpi-val" style="font-size:18px">${payFmt(total)}</div><div class="kpi-sub" style="color:var(--muted)">${payData.length} invoices total</div></div>
