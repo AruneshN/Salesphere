@@ -234,6 +234,18 @@ class Allproducts(LoginRequiredMixin, TemplateView):
         return HttpResponse(products)
 
 
-
-
+class payment(LoginRequiredMixin, TemplateView):
+    
+    template_name="dashboard.html"
+    def get(self,request,*args,**kwargs):
+        pending_bills = Bill.objects.filter(
+    bill_status='Finalized',
+).exclude(
+    paid_amount__gt=0,  
+).select_related('customer').order_by('due_date')
+        
+        return render(request,self.template_name,context=
+                      {
+                          "bills":pending_bills
+                      })
 

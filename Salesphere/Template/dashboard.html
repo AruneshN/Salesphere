@@ -387,6 +387,168 @@ select.tbl-filter:focus{border-color:var(--accent)}
 #inv-alerts-view.hidden{display:none}
 #inv-stock-view{display:none;flex-direction:column;gap:14px}
 #inv-stock-view.active{display:flex}
+
+
+/* -- PAYMENTS Table */
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#f5f4f0;--surface:#fff;--border:#e8e7e2;--accent:#2563ff;--accent-light:#eff3ff;
+  --text:#0f1117;--muted:#7a7a85;--light:#b0b0bb;
+  --success:#16a34a;--success-light:#f0fdf4;--warning:#d97706;--warning-light:#fffbeb;
+  --danger:#dc2626;--danger-light:#fef2f2;
+  --font:'DM Sans',system-ui,sans-serif;--mono:'Space Mono',monospace;
+  --r:8px;--rl:12px;--rxl:16px
+}
+body{font-family:var(--font);background:var(--bg);color:var(--text);font-size:13px;padding:20px}
+.pay-wrap{display:flex;flex-direction:column;gap:16px}
+
+/* kpi row */
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:14px 16px}
+.kpi-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;font-weight:600;margin-bottom:5px}
+.kpi-val{font-size:22px;font-weight:600;font-family:var(--mono);letter-spacing:-1px}
+.kpi-sub{font-size:11px;margin-top:3px}
+.up{color:var(--success)}.dn{color:var(--danger)}.warn{color:var(--warning)}
+
+/* table card */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rxl);overflow:hidden}
+.card-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border)}
+.card-title{font-size:14px;font-weight:600}
+.card-sub{font-size:11px;color:var(--muted);margin-top:2px}
+
+/* toolbar */
+.toolbar{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.srch-wrap{position:relative;flex:1;min-width: 0;}
+.srch-wrap svg{position:absolute;left:9px;top:50%;transform:translateY(-50%);width:14px;height:14px;color:var(--muted);pointer-events:none}
+.srch-wrap input{width:100%;padding:6px 10px 6px 30px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);font-family:var(--font);font-size:12px;outline:none;transition:all .15s}
+.srch-wrap input:focus{border-color:var(--accent);background:var(--surface);box-shadow:0 0 0 3px rgba(37,99,255,.08)}
+
+/* customer dropdown */
+.cust-wrap{position:relative;flex-shrink:0}
+.cust-btn{width: 148px;flex-shrink: 0;
+  
+  display:flex;align-items:center;gap:6px;padding:6px 10px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);
+  color:var(--text);font-size:12px;cursor:pointer;white-space:nowrap;min-width:148px;justify-content:space-between;font-family:var(--font)}
+.cust-btn:hover{border-color:#93c5fd}
+.cust-btn.on{border-color:var(--accent);background:var(--accent-light);color:var(--accent)}
+.cust-lft{display:flex;align-items:center;gap:5px;overflow:hidden}
+.cust-lft span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:100px}
+.cust-panel{display:none;position:absolute;top:calc(100% + 4px);left:0;width:240px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);z-index:200;overflow:hidden;box-shadow:0 8px 24px rgba(0,0,0,.1)}
+.cust-panel.open{display:block}
+.cp-srch{padding:8px 10px;border-bottom:1px solid var(--border);position:relative}
+.cp-srch svg{position:absolute;left:18px;top:50%;transform:translateY(-50%);width:13px;height:13px;color:var(--muted);pointer-events:none}
+.cp-srch input{width:100%;padding:5px 8px 5px 26px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);font-family:var(--font);font-size:12px;outline:none;color:var(--text)}
+.cp-srch input:focus{border-color:var(--accent)}
+.cp-list{max-height:200px;overflow-y:auto}
+.cp-item{display:flex;align-items:center;gap:8px;padding:8px 12px;cursor:pointer;font-size:12px}
+.cp-item:hover{background:var(--bg)}
+.cp-item.sel{background:var(--accent-light);color:var(--accent)}
+.cp-av{width:24px;height:24px;border-radius:50%;background:var(--accent-light);color:var(--accent);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;font-family:var(--mono)}
+.cp-item.sel .cp-av{background:rgba(37,99,255,.2)}
+.cp-nm{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cp-tp{font-size:11px;color:var(--muted)}
+.cp-item.sel .cp-tp{color:rgba(37,99,255,.7)}
+.cp-ft{border-top:1px solid var(--border);padding:6px 10px}
+.cp-clr{font-size:11px;color:var(--accent);cursor:pointer;background:none;border:none;padding:0;font-family:var(--font)}
+.cp-clr:hover{text-decoration:underline}
+.cp-none{padding:10px 12px;font-size:12px;color:var(--muted);text-align:center}
+
+/* filter chips */
+.chips{display:flex;gap:6px;flex-wrap:wrap;padding:0 14px 10px;min-height:0}
+.chips:empty{display:none}
+.fchip{display:inline-flex;align-items:center;gap:4px;padding:3px 8px;border-radius:20px;background:var(--accent-light);border:1px solid #bfdbfe;font-size:11px;color:var(--accent)}
+.fchip button{background:none;border:none;cursor:pointer;color:var(--accent);padding:0;line-height:1;display:flex;align-items:center;font-size:13px}
+
+select.flt{flex-shrink: 0;padding:5px 8px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);font-size:12px;outline:none;cursor:pointer;flex-shrink:0;font-family:var(--font)}
+select.flt:focus{border-color:var(--accent)}
+
+#paySFlt  { width: 130px; }
+#payPPFlt { width: 100px; }
+
+/* table */
+.tbl-wrap{overflow-x:auto}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+thead tr{background:#faf9f7}
+th{padding:8px 12px;font-size:10px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.7px;border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
+th:hover{color:var(--text)}
+.si{margin-left:2px;opacity:.4;font-size:9px}
+th.aso .si{opacity:1;color:var(--accent)}
+tbody tr{border-bottom:1px solid var(--border);transition:background .1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover td{background:#faf9f7}
+td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.inv-pill{font-family:var(--mono);font-size:11px;color:var(--accent);background:var(--accent-light);padding:2px 7px;border-radius:5px;border:1px solid #bfdbfe;display:inline-block}
+.av-sm{width:26px;height:26px;border-radius:50%;background:var(--accent-light);color:var(--accent);display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:600;flex-shrink:0;font-family:var(--mono)}
+.cname{font-weight:500;font-size:12px}
+.ctype{font-size:10px;color:var(--muted);margin-top:1px}
+.mono{font-family:var(--mono);font-size:12px}
+.red-mono{font-family:var(--mono);font-size:12px;color:var(--danger)}
+.badge{display:inline-flex;align-items:center;gap:3px;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600}
+.badge::before{content:'';width:4px;height:4px;border-radius:50%;display:block;flex-shrink:0}
+.b-paid{background:#f0fdf4;color:#16a34a}.b-paid::before{background:#16a34a}
+.b-partial{background:#fffbeb;color:#d97706}.b-partial::before{background:#d97706}
+.b-pending{background:var(--accent-light);color:var(--accent)}.b-pending::before{background:var(--accent)}
+.b-overdue{background:var(--danger-light);color:var(--danger)}.b-overdue::before{background:var(--danger)}
+.prog-wrap{display:inline-block;width:36px;height:3px;background:#e8e7e2;border-radius:2px;vertical-align:middle;margin-left:5px}
+.prog-bar{height:3px;border-radius:2px}
+.due-ok{color:var(--muted);font-size:11px}
+.due-warn{color:var(--warning);font-size:11px;font-weight:500}
+.due-over{color:var(--danger);font-size:11px;font-weight:500}
+
+/* collect cell */
+.cc{display:flex;flex-direction:column;gap:4px}
+.cc-r1{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.amt-i{width:110px !important;padding:5px 7px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--text);font-size:12px;font-family:var(--mono);outline:none;text-align:right;transition:all .15s}
+.amt-i:focus{border-color:var(--accent);box-shadow:0 0 0 2px rgba(37,99,255,.08);background:var(--surface)}
+.amt-i.ok{border-color:#86efac;background:#f0fdf4;color:#16a34a}
+.amt-i.over{border-color:#fca5a5;background:var(--danger-light);color:var(--danger)}
+.mth-s{padding:5px 5px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--muted);font-size:11px;outline:none;cursor:pointer;max-width:80px;font-family:var(--font)}
+.mth-s:focus{border-color:var(--accent)}
+.prev-tag{font-size:10px;font-weight:600;padding:2px 7px;border-radius:20px;white-space:nowrap;display:none;align-items:center;gap:2px;flex-shrink:0}
+.prev-tag.show{display:inline-flex}
+.prev-tag.sp{background:#f0fdf4;color:#16a34a}
+.prev-tag.pp{background:#fffbeb;color:#d97706}
+.cbtn{padding:5px 9px;border-radius:var(--r);border:none;background:var(--accent);color:#fff;font-size:11px;font-weight:600;cursor:pointer;white-space:nowrap;flex-shrink:0;display:flex;align-items:center;gap:3px;font-family:var(--font);transition:all .15s}
+.cbtn:hover{background:#1d50e0}
+.cbtn:disabled{opacity:.35;cursor:default}
+.note-i{width:100%;padding:4px 7px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--muted);font-size:11px;outline:none;display:none;font-family:var(--font)}
+.note-i.show{display:block}
+.note-i:focus{border-color:var(--accent)}
+
+/* settled cell */
+.stl{display:flex;align-items:center;gap:6px}
+.stl-info{flex:1;min-width:0}
+.stl-amt{font-family:var(--mono);font-size:12px;color:#16a34a;font-weight:600}
+.stl-meta{font-size:10px;color:var(--muted);margin-top:1px;display:flex;gap:4px;align-items:center}
+.mth-tag{background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:1px 5px;font-size:10px;color:var(--muted)}
+.act-btns{display:flex;gap:4px;flex-shrink:0}
+.ibtn{width:26px;height:26px;border-radius:6px;border:1px solid var(--border);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--muted);transition:all .12s}
+.ibtn svg{width:13px;height:13px}
+.ibtn.ed:hover{border-color:#93c5fd;background:var(--accent-light);color:var(--accent)}
+.ibtn.ud:hover{border-color:#fca5a5;background:var(--danger-light);color:var(--danger)}
+.closed-msg{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px}
+.closed-msg svg{width:14px;height:14px;color:#16a34a}
+
+/* edit cell */
+.ec{display:flex;flex-direction:column;gap:4px}
+.ec-r1{display:flex;align-items:center;gap:4px;flex-wrap:wrap}
+.edit-i{width:82px;padding:5px 7px;border:1.5px solid var(--accent);border-radius:var(--r);background:var(--surface);color:var(--text);font-size:12px;font-family:var(--mono);outline:none;text-align:right;box-shadow:0 0 0 3px rgba(37,99,255,.1)}
+.edit-m{padding:5px 5px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--muted);font-size:11px;outline:none;cursor:pointer;max-width:80px;font-family:var(--font)}
+.sv-btn{padding:5px 9px;border-radius:var(--r);border:none;background:var(--accent);color:#fff;font-size:11px;font-weight:600;cursor:pointer;font-family:var(--font)}
+.sv-btn:hover{background:#1d50e0}
+.cn-btn{padding:5px 7px;border-radius:var(--r);border:1px solid var(--border);background:transparent;color:var(--muted);font-size:11px;cursor:pointer;font-family:var(--font)}
+.cn-btn:hover{background:var(--bg)}
+.edit-n{width:100%;padding:3px 7px;border:1px solid var(--border);border-radius:var(--r);background:var(--bg);color:var(--muted);font-size:11px;outline:none;font-family:var(--font)}
+.edit-n:focus{border-color:var(--accent)}
+
+/* footer / pagination */
+.foot{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-top:1px solid var(--border);background:#faf9f7;font-size:11px;color:var(--muted)}
+.pag{display:flex;gap:4px}
+.pb{min-width:28px;height:28px;padding:0 6px;border-radius:7px;border:1px solid var(--border);background:transparent;color:var(--text);font-family:var(--font);font-size:11px;cursor:pointer;transition:all .12s}
+.pb:hover:not(:disabled):not(.act){background:var(--bg)}
+.pb:disabled{opacity:.35;cursor:default}
+.pb.act{background:var(--accent);border-color:var(--accent);color:#fff}
+.empty-row td{text-align:center;padding:28px;color:var(--muted);font-size:12px}
 </style>
 </head>
 <body>
@@ -433,7 +595,8 @@ select.tbl-filter:focus{border-color:var(--accent)}
   </div>
 
   <div class="nav-section">Finance</div>
-  <div class="nav-item">
+ 
+   <div class="nav-item" data-url="/payments/" onclick="window.location.href='{% url 'invoice-payment' %}'" >
     <svg class="nav-icon" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.3"><circle cx="8" cy="8" r="6"/><path d="M8 5v3l2 2" stroke-linecap="round"/></svg>
     Payments
   </div>
@@ -543,7 +706,7 @@ select.tbl-filter:focus{border-color:var(--accent)}
         <div class="card-header">
           <div><div class="card-title">Sales trend</div><div class="card-sub">Last 7 days · Daily revenue (₹)</div></div>
           <div style="display:flex;gap:24px">
-            <div style="text-align:right"><div style="font-size:10px;color:var(--text-muted)">Week total</div><div style="font-family:var(--mono);font-weight:600;font-size:13px">₹{{week_total_amount}}</div></div>
+            <div style="text-align:right"><div style="font-size:10px;color:var(--text-muted)">Week total</div><div style="font-family:var(--mono);font-weight:600;font-size:13px">₹{{week_total_amount|floatformat:0}}</div></div>
             <div style="text-align:right"><div style="font-size:10px;color:var(--text-muted)">Peak day</div><div style="font-family:var(--mono);font-weight:600;font-size:13px">₹{{peek_day}}</div></div>
             <div style="text-align:right"><div style="font-size:10px;color:var(--text-muted)">Avg/day</div><div style="font-family:var(--mono);font-weight:600;font-size:13px">₹{{Avg_day}}</div></div>
           </div>
@@ -980,9 +1143,124 @@ select.tbl-filter:focus{border-color:var(--accent)}
   <!-- ══════ PAGE: PAYMENTS ══════ -->
   <div class="page" id="p-payments">
     <div class="sec-card" style="text-align:center;padding:60px 24px">
-      <div style="font-size:40px;margin-bottom:16px">💳</div>
-      <div style="font-size:17px;font-weight:600;margin-bottom:8px">Payments</div>
-      <div style="font-size:13px;color:var(--text-muted)">Payment tracking and reconciliation coming here.</div>
+      <!-- bill cards -->
+      <div class="pay-wrap">
+
+  <div class="kpi-row" id="kpiRow"></div>
+
+  <div class="card">
+    <div class="card-hd">
+      <div>
+        <button onclick="exportCSV()" style="display:flex;align-items:center;gap:6px;padding:7px 13px;border-radius:8px;border:1px solid var(--border);background:var(--surface);font-size:12px;font-weight:500;cursor:pointer;font-family:var(--font)">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" width="13" height="13"><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2M7 10l5 5 5-5M12 15V3"/></svg>
+        Export CSV
+      </button>
+      </div>
+    </div>
+
+    <div class="toolbar">
+      <div class="srch-wrap">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+        <input type="text" id="paySearch" placeholder="Search invoice or customer…" oninput="payRender()">
+      </div>
+      <div class="cust-wrap" id="payCtWrap">
+        <button class="cust-btn" id="payCtBtn" onclick="payTogglePanel()">
+          <span class="cust-lft">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="13" height="13"><path d="M12 12a4 4 0 100-8 4 4 0 000 8zM6 20a6 6 0 0112 0H6z"/></svg>
+            <span id="payCtLbl">All customers</span>
+          </span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="12" height="12"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="cust-panel" id="payCtPanel">
+          <div class="cp-srch">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.35-4.35"/></svg>
+            <input type="text" id="payCtSearch" placeholder="Search customers…" oninput="payBuildCp()" autocomplete="off">
+          </div>
+          <div class="cp-list" id="payCtList"></div>
+          <div class="cp-ft"><button class="cp-clr" onclick="payClearCust()">Clear filter</button></div>
+        </div>
+      </div>
+      <select class="flt" id="paySFlt" onchange="payRender()">
+        <option value="">All statuses</option>
+        <option value="Pending">Pending</option>
+        <option value="Partial">Partial</option>
+        <option value="Overdue">Overdue</option>
+        <option value="Paid">Paid</option>
+      </select>
+      <select class="flt" id="payPPFlt" onchange="payPPCh()">
+        <option value="6">6 / page</option>
+        <option value="10">10 / page</option>
+        <option value="20">20 / page</option>
+      </select>
+    </div>
+
+    <div class="chips" id="payChips"></div>
+
+          <div class="tbl-wrap">
+        <table>
+          <thead><tr>
+            <th style="width:98px" onclick="paySrt('inv')">Invoice <span class="si" id="pss-inv">↕</span></th>
+            <th style="width:148px" onclick="paySrt('cust')">Customer <span class="si" id="pss-cust">↕</span></th>
+            <th style="width:78px" onclick="paySrt('due')">Due <span class="si" id="pss-due">↕</span></th>
+            <th style="width:96px" onclick="paySrt('total')">Total <span class="si" id="pss-total">↕</span></th>
+            <th style="width:90px" onclick="paySrt('bal')">Balance <span class="si" id="pss-bal">↕</span></th>
+            <th style="width:78px">Status</th>
+            <th>Collect payment</th>
+            <th style="width:70px">Actions</th>
+          </tr></thead>
+          <tbody id="payTbody"></tbody>
+        </table>
+      </div>
+    <div class="foot">
+      <span id="payPgInfo"></span>
+      <div class="pag" id="payPagDiv"></div>
+    </div>
+  </div>
+  <!-- ══════ PAYMENT EDIT MODAL ══════ -->
+<div class="overlay" id="payEditOverlay">
+  <div class="modal">
+    <div class="mhd">
+      <span class="mtitle">Edit payment record</span>
+      <button class="mclose" onclick="closePayModals()">×</button>
+    </div>
+    <div class="fgrid">
+      <div class="fg"><label>Invoice</label><input id="peInv" type="text" readonly style="opacity:0.6;cursor:not-allowed"></div>
+      <div class="fg"><label>Customer</label><input id="peCust" type="text" readonly style="opacity:0.6;cursor:not-allowed"></div>
+      <div class="fg"><label>Total Amount (₹)</label><input id="peTotal" type="number" min="0" step="0.01"></div>
+      <div class="fg"><label>Amount Paid (₹)</label><input id="pePaid" type="number" min="0" step="0.01"></div>
+      <div class="fg"><label>Payment Method</label>
+        <select id="peMeth">
+          <option>Cash</option><option>UPI</option><option>Card</option>
+          <option>Bank transfer</option><option>Cheque</option>
+        </select>
+      </div>
+      <div class="fg"><label>Due Date</label><input id="peDue" type="date"></div>
+      <div class="fg full"><label>Note</label><input id="peNote" type="text" placeholder="Optional note…" maxlength="80"></div>
+    </div>
+    <div class="mfooter">
+      <button class="btn btn-ghost" onclick="closePayModals()">Cancel</button>
+      <button class="btn btn-primary" onclick="savePayEdit()">Save changes</button>
+    </div>
+  </div>
+</div>
+
+<!-- ══════ PAYMENT DELETE MODAL ══════ -->
+<div class="overlay" id="payDelOverlay">
+  <div class="modal" style="width:400px">
+    <div class="mhd">
+      <span class="mtitle">Delete payment record</span>
+      <button class="mclose" onclick="closePayModals()">×</button>
+    </div>
+    <p class="delbody">Are you sure you want to permanently delete invoice <strong id="payDelName"></strong>? This action cannot be undone.</p>
+    <div class="mfooter">
+      <button class="btn btn-ghost" onclick="closePayModals()">Cancel</button>
+      <button class="btn btn-danger" onclick="confirmPayDelete()">Delete record</button>
+    </div>
+  </div>
+</div>
+
+</div>
+
     </div>
   </div>
 
@@ -1053,6 +1331,7 @@ const pageMeta = {
   bills:     {title:'Bills & Invoicing',    sub:'Create and manage bills'},
   customers: {title:'Add Customer',         sub:'Customer management'},
   inventory: {title:'Stock Alerts',         sub:'Inventory requires attention'},
+  payments: {title:'Payment Overview',       sub:'Bill Payment and Payment History Record '}
 };
 
 /* ═══════════════════════════════════════════
@@ -1067,6 +1346,8 @@ window.addEventListener('DOMContentLoaded', function () {
   if (path.includes('create_bill'))  activePage = 'bills';
   if (path.includes('stock_alert'))  activePage = 'inventory';
   if (path.includes('dashboard'))    activePage = 'dashboard';
+  // payment add 
+  if (path.includes('payments'))    activePage = 'payments';
 
   // show correct page
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
@@ -1437,34 +1718,6 @@ function toast(msg) { showToast(msg, false); } // legacy alias
    CHART
 ═══════════════════════════════════════════ */
 let chartInst;
-// function initChart() {
-//   const canvas = document.getElementById('salesChart');
-//   if (!canvas) return;
-//   if (chartInst) chartInst.destroy();
-//   const vals = [8400,11200,9800,14300,10500,13600,12450];
-//   chartInst = new Chart(canvas, {
-//     type: 'bar',
-//     data: {
-//       labels: ['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
-//       datasets: [{
-//         label:'Revenue (₹)', data:vals,
-//         backgroundColor: vals.map((_,i)=>i===3?'#2563ff':'rgba(37,99,255,0.15)'),
-//         borderColor:     vals.map((_,i)=>i===3?'#1d50e0':'rgba(37,99,255,0.4)'),
-//         borderWidth:1.5, borderRadius:6, borderSkipped:false
-//       }]
-//     },
-//     options:{
-//       responsive:true, maintainAspectRatio:false,
-//       plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>'₹'+ctx.raw.toLocaleString('en-IN')}}},
-//       scales:{
-//         x:{grid:{display:false},ticks:{font:{size:11},color:'#7a7a85'}},
-//         y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#7a7a85',callback:v=>'₹'+(v/1000).toFixed(0)+'k'}}
-//       }
-//     }
-//   });
-// }
-
-
 function initChart() {
   const canvas = document.getElementById('salesChart');
   if (!canvas) return;
@@ -1498,6 +1751,348 @@ function initChart() {
   });
 }
 
+
+// payment  table
+const payToday = new Date('2026-05-31');
+const PAY_METHODS = ['Cash','UPI','Card','Bank transfer','Cheque'];
+
+let payData = [
+{% for inv in bills %}
+{
+    id: {{ inv.id }},
+    inv: "{{ inv.Bill_num|escapejs }}",
+    cust: "{{ inv.customer.name|escapejs }}",
+    type: "{{ inv.customer.customer_type|escapejs }}",
+    due: "{{ inv.due_date }}",
+    total: {{ inv.grand_total }},
+    paid: {{ inv.paid_amount }},
+    settled: null,
+    sMethod: "{{inv.payment_method|escapejs }}",
+    sNote: "",
+    editing: false
+}{% if not forloop.last %},{% endif %}
+{% endfor %}
+];
+const payCusts = [...new Map(payData.map(d=>[d.cust,{name:d.cust,type:d.type}])).values()];
+let paySC='', paySK='due', paySA=true, payPg=1, payPP=6;
+
+function payInits(n){return n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}
+function payCalcS(r){
+  if(r.paid>=r.total) return 'Paid';
+  if(r.paid>0) return 'Partial';
+  if(new Date(r.due)<payToday) return 'Overdue';
+  return 'Pending';
+}
+function payDueLabel(ds){
+  const d=new Date(ds), diff=Math.round((d-payToday)/86400000);
+  if(diff<0) return {txt:Math.abs(diff)+'d overdue',cls:'due-over'};
+  if(diff===0) return {txt:'Due today',cls:'due-warn'};
+  if(diff<=7) return {txt:'In '+diff+'d',cls:'due-warn'};
+  return {txt:d.toLocaleDateString('en-IN',{day:'2-digit',month:'short'}),cls:'due-ok'};
+}
+function payFmt(n){return '₹'+Math.round(n).toLocaleString('en-IN')}
+function payBadgeCls(s){return s==='Paid'?'b-paid':s==='Partial'?'b-partial':s==='Overdue'?'b-overdue':'b-pending'}
+function payMthOpts(sel){return PAY_METHODS.map(m=>`<option${m===sel?' selected':''}>${m}</option>`).join('')}
+
+function payRenderKPI(){
+  const total=payData.reduce((a,r)=>a+r.total,0);
+  const collected=payData.reduce((a,r)=>a+r.paid,0);
+  const outstanding=total-collected;
+  const overdue=payData.filter(r=>payCalcS(r)==='Overdue').reduce((a,r)=>a+(r.total-r.paid),0);
+  document.getElementById('kpiRow').innerHTML=`
+    <div class="kpi"><div class="kpi-lbl">Total Outstanding</div><div class="kpi-val" style="font-size:18px;color:var(--danger)">${payFmt(outstanding)}</div><div class="kpi-sub warn">${payData.filter(r=>payCalcS(r)!=='Paid').length} unpaid invoices</div></div>
+    <div class="kpi"><div class="kpi-lbl">Collected</div><div class="kpi-val" style="font-size:18px;color:var(--success)">${payFmt(collected)}</div><div class="kpi-sub up">${Math.round(collected/total*100)}% collection rate</div></div>
+    <div class="kpi"><div class="kpi-lbl">Overdue</div><div class="kpi-val" style="font-size:18px;color:var(--danger)">${payFmt(overdue)}</div><div class="kpi-sub" style="color:var(--muted)">${payData.filter(r=>payCalcS(r)==='Overdue').length} invoices overdue</div></div>
+    <div class="kpi"><div class="kpi-lbl">Total Billed</div><div class="kpi-val" style="font-size:18px">${payFmt(total)}</div><div class="kpi-sub" style="color:var(--muted)">${payData.length} invoices total</div></div>
+  `;
+}
+
+function payBuildCp(){
+  const q=(document.getElementById('payCtSearch').value||'').toLowerCase();
+  const list=q?payCusts.filter(c=>c.name.toLowerCase().includes(q)):payCusts;
+  const el=document.getElementById('payCtList');
+  if(!list.length){el.innerHTML='<div class="cp-none">No customers found</div>';return;}
+  el.innerHTML=list.map(c=>`
+    <div class="cp-item${paySC===c.name?' sel':''}" onclick="paySelCust('${c.name.replace(/'/,"\\'")}')" >
+      <div class="cp-av">${payInits(c.name)}</div>
+      <div style="flex:1;min-width:0"><div class="cp-nm">${c.name}</div><div class="cp-tp">${c.type}</div></div>
+      ${paySC===c.name?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="12" height="12" style="color:var(--accent)"><path d="M20 6L9 17l-5-5"/></svg>':''}
+    </div>`).join('');
+}
+function payTogglePanel(){
+  const p=document.getElementById('payCtPanel'), b=document.getElementById('payCtBtn');
+  const open=p.classList.toggle('open');
+  if(open){payBuildCp();setTimeout(()=>document.getElementById('payCtSearch').focus(),50);}
+}
+function paySelCust(n){
+  paySC=paySC===n?'':n;
+  document.getElementById('payCtLbl').textContent=paySC||'All customers';
+  document.getElementById('payCtBtn').classList.toggle('on',!!paySC);
+  payBuildCp();payPg=1;payRender();payRenderChips();
+}
+function payClearCust(){
+  paySC='';document.getElementById('payCtSearch').value='';
+  document.getElementById('payCtLbl').textContent='All customers';
+  document.getElementById('payCtBtn').classList.remove('on');
+  payBuildCp();payPg=1;payRender();payRenderChips();
+  document.getElementById('payCtPanel').classList.remove('open');
+}
+document.addEventListener('click',function(e){
+  if(!document.getElementById('payCtWrap').contains(e.target))
+    document.getElementById('payCtPanel').classList.remove('open');
+});
+
+function payRenderChips(){
+  const chips=document.getElementById('payChips');
+  let h='';
+  if(paySC) h+=`<span class="fchip">${paySC}<button onclick="payClearCust()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11"><path d="M18 6L6 18M6 6l12 12"/></svg></button></span>`;
+  const sf=document.getElementById('paySFlt').value;
+  if(sf) h+=`<span class="fchip">${sf}<button onclick="document.getElementById('paySFlt').value='';payRender();payRenderChips()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11"><path d="M18 6L6 18M6 6l12 12"/></svg></button></span>`;
+  chips.innerHTML=h;
+}
+
+function payFiltered(){
+  const q=(document.getElementById('paySearch').value||'').toLowerCase();
+  const sf=document.getElementById('paySFlt').value;
+  return payData.filter(r=>
+    (!q||r.inv.toLowerCase().includes(q)||r.cust.toLowerCase().includes(q))&&
+    (!paySC||r.cust===paySC)&&
+    (!sf||payCalcS(r)===sf)
+  ).sort((a,b)=>{
+    let va,vb;
+    if(paySK==='bal'){va=a.total-a.paid;vb=b.total-b.paid;}
+    else if(paySK==='total'){va=a.total;vb=b.total;}
+    else if(paySK==='due'){va=a.due;vb=b.due;}
+    else{va=a[paySK==='inv'?'inv':'cust'];vb=b[paySK==='inv'?'inv':'cust'];}
+    if(typeof va==='string'){va=va.toLowerCase();vb=vb.toLowerCase();}
+    return paySA?(va>vb?1:-1):(va<vb?1:-1);
+  });
+}
+
+function payCollectCell(r){
+  const s=payCalcS(r), bal=r.total-r.paid;
+  if(s==='Paid') return `<td><div class="closed-msg"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>Closed</div></td>`;
+  if(r.settled!==null&&!r.editing){
+    return `<td><div class="stl">
+      <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" width="15" height="15" aria-hidden="true" style="flex-shrink:0"><path d="M22 11.08V12a10 10 0 11-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+      <div class="stl-info">
+        <div class="stl-amt">${payFmt(r.settled)} collected</div>
+        <div class="stl-meta"><span class="mth-tag">${r.sMethod}</span>${r.sNote?`<span style="font-size:10px;overflow:hidden;text-overflow:ellipsis;max-width:70px" title="${r.sNote}">${r.sNote}</span>`:''}</div>
+      </div>
+      <div class="act-btns">
+        <button class="ibtn ed" title="Edit" onclick="payStartEdit(${r.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4z"/></svg></button>
+        <button class="ibtn ud" title="Undo" onclick="payUndoSettle(${r.id})"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 00-9-9 9 9 0 00-6 2.3L3 13"/></svg></button>
+      </div>
+    </div></td>`;
+  }
+  if(r.editing){
+    return `<td><div class="ec">
+      <div class="ec-r1">
+        <input class="edit-i" type="number" id="pedit-${r.id}" value="${r.settled||''}" min="1" max="${r.total}" step="1" placeholder="${Math.round(bal)}" onkeydown="if(event.key==='Enter')paySaveEdit(${r.id},${r.total})">
+        <select class="edit-m" id="pemth-${r.id}">${payMthOpts(r.sMethod)}</select>
+        <button class="sv-btn" onclick="paySaveEdit(${r.id},${r.total})">Save</button>
+        <button class="cn-btn" onclick="payCancelEdit(${r.id})">Cancel</button>
+      </div>
+      <input class="edit-n" type="text" id="penote-${r.id}" value="${r.sNote||''}" placeholder="Note (optional)…" maxlength="60">
+    </div></td>`;
+  }
+  return `<td><div class="cc">
+    <div class="cc-r1">
+      <input class="amt-i" type="number" id="pamt-${r.id}" placeholder="${Math.round(bal)}" min="1" max="${bal}" step="1"
+        oninput="payOnAmt(${r.id},${bal})" onkeydown="if(event.key==='Enter')payDoSettle(${r.id},${bal})">
+      <select class="mth-s" id="pmth-${r.id}">${payMthOpts('Cash')}</select>
+      <span class="prev-tag" id="pprev-${r.id}"></span>
+      <button class="cbtn" id="pcbtn-${r.id}" onclick="payDoSettle(${r.id},${bal})" disabled>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" width="11" height="11"><path d="M20 6L9 17l-5-5"/></svg> Confirm
+      </button>
+    </div>
+    <input class="note-i" type="text" id="pnote-${r.id}" placeholder="Note (optional)…" maxlength="60"
+      onfocus="this.classList.add('show')" onblur="if(!this.value)this.classList.remove('show')">
+  </div></td>`;
+}
+
+function payRender(){
+  payRenderChips();payRenderKPI();
+  const list=payFiltered(), tot=list.length;
+  const pages=Math.max(1,Math.ceil(tot/payPP));
+  if(payPg>pages) payPg=pages;
+  const slice=list.slice((payPg-1)*payPP,payPg*payPP);
+  if(!slice.length){
+    document.getElementById('payTbody').innerHTML=`<tr class="empty-row"><td colspan="7">No invoices match current filters</td></tr>`;
+  } else {
+   document.getElementById('payTbody').innerHTML=slice.map(r=>{
+      const s=payCalcS(r), bal=r.total-r.paid;
+      const pct=Math.round((r.paid/r.total)*100);
+      const barC=pct===100?'#16a34a':pct>0?'#d97706':'#bfdbfe';
+      const dl=payDueLabel(r.due);
+      return `<tr id="ptr-${r.id}">
+        <td><span class="inv-pill">${r.inv}</span></td>
+        <td><div style="display:flex;align-items:center;gap:8px">
+          <div class="av-sm">${payInits(r.cust)}</div>
+          <div><div class="cname">${r.cust}</div><div class="ctype">${r.type}</div></div>
+        </div></td>
+        <td><span class="${dl.cls}">${dl.txt}</span></td>
+        <td><span class="mono">${payFmt(r.total)}<span class="prog-wrap"><span class="prog-bar" style="width:${pct}%;background:${barC}"></span></span></span></td>
+        <td><span class="${bal>0&&s!=='Paid'?'red-mono':'mono'}">${payFmt(bal)}</span></td>
+        <td><span class="badge ${payBadgeCls(s)}">${s}</span></td>
+        ${payCollectCell(r)}
+        <td><div class="act-cell">
+          <button class="ibtn iedit" title="Edit" onclick="openPayEditModal(${r.id})">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+          </button>
+          <button class="ibtn idel" title="Delete" onclick="openPayDelModal(${r.id})">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4a1 1 0 011-1h4a1 1 0 011 1v2"/></svg>
+          </button>
+        </div></td>
+      </tr>`;
+    }).join('');
+  }
+  const start=tot===0?0:(payPg-1)*payPP+1;
+  document.getElementById('payPgInfo').textContent=`Showing ${start}–${Math.min(payPg*payPP,tot)} of ${tot}`;
+  let btns=`<button class="pb" onclick="payGp(${payPg-1})" ${payPg===1?'disabled':''}>‹</button>`;
+  for(let p=1;p<=pages;p++) btns+=`<button class="pb${p===payPg?' act':''}" onclick="payGp(${p})">${p}</button>`;
+  btns+=`<button class="pb" onclick="payGp(${payPg+1})" ${payPg===pages?'disabled':''}>›</button>`;
+  document.getElementById('payPagDiv').innerHTML=btns;
+  ['inv','cust','due','total','bal'].forEach(k=>{
+    const el=document.getElementById('pss-'+k);
+    if(el){el.textContent=paySK===k?(paySA?'↑':'↓'):'↕';el.parentElement.classList.toggle('aso',paySK===k);}
+  });
+}
+
+function payOnAmt(id,bal){
+  const inp=document.getElementById('pamt-'+id);
+  const btn=document.getElementById('pcbtn-'+id);
+  const sp=document.getElementById('pprev-'+id);
+  const val=parseFloat(inp.value)||0;
+  inp.className='amt-i';sp.className='prev-tag';sp.textContent='';btn.disabled=true;
+  if(val<=0||val>bal){if(val>bal)inp.className='amt-i over';return;}
+  btn.disabled=false;
+  if(Math.round(val)===Math.round(bal)){inp.className='amt-i ok';sp.className='prev-tag show sp';sp.innerHTML='✓ Full';}
+  else{sp.className='prev-tag show pp';sp.textContent='Partial';}
+  document.getElementById('pnote-'+id)?.classList.add('show');
+}
+
+function payDoSettle(id,bal){
+  const inp=document.getElementById('pamt-'+id);
+  const val=parseFloat(inp.value)||0;
+  if(val<=0||val>bal) return;
+  const r=payData.find(i=>i.id===id);if(!r)return;
+  r.paid=Math.min(r.paid+val,r.total);
+  r.settled=val;
+  r.sMethod=document.getElementById('pmth-'+id)?.value||'Cash';
+  r.sNote=document.getElementById('pnote-'+id)?.value||'';
+  r.editing=false;
+  payRender();
+}
+
+function payStartEdit(id){
+  payData.forEach(i=>{if(i.id!==id)i.editing=false;});
+  const r=payData.find(i=>i.id===id);if(!r)return;
+  r.editing=true;payRender();
+  setTimeout(()=>{const el=document.getElementById('pedit-'+id);if(el){el.focus();el.select();}},30);
+}
+
+function paySaveEdit(id,total){
+  const inp=document.getElementById('pedit-'+id);
+  const nv=parseFloat(inp.value)||0;
+  const r=payData.find(i=>i.id===id);if(!r)return;
+  if(nv<=0||nv>total){inp.style.borderColor='#fca5a5';return;}
+  r.paid=Math.min(r.paid-(r.settled||0)+nv,total);
+  r.settled=nv;
+  r.sMethod=document.getElementById('pemth-'+id)?.value||r.sMethod;
+  r.sNote=document.getElementById('penote-'+id)?.value||'';
+  r.editing=false;payRender();
+}
+
+function payCancelEdit(id){const r=payData.find(i=>i.id===id);if(r){r.editing=false;payRender();}}
+
+function payUndoSettle(id){
+  const r=payData.find(i=>i.id===id);if(!r)return;
+  r.paid=Math.max(0,r.paid-(r.settled||0));
+  r.settled=null;r.sNote='';r.editing=false;payRender();
+}
+
+function paySrt(k){if(paySK===k)paySA=!paySA;else{paySK=k;paySA=true;}payPg=1;payRender();}
+function payGp(p){payPg=p;payRender();}
+function payPPCh(){payPP=parseInt(document.getElementById('payPPFlt').value);payPg=1;payRender();}
+
+function exportCSV(){
+  const rows=[['Invoice','Customer','Type','Due','Total','Paid','Balance','Status']];
+  payData.forEach(r=>{
+    const s=payCalcS(r);
+    rows.push([r.inv,r.cust,r.type,r.due,r.total,r.paid,r.total-r.paid,s]);
+  });
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(rows.map(r=>r.join(',')).join('\n'));
+  a.download='payments.csv';a.click();
+}
+
+payRender();
+
+/* ═══════════════════════════════════════════
+   PAYMENT EDIT / DELETE MODALS
+═══════════════════════════════════════════ */
+let payEditId = null, payDelId = null;
+
+function openPayEditModal(id) {
+  const r = payData.find(i => i.id === id);
+  if (!r) return;
+  payEditId = id;
+  document.getElementById('peInv').value   = r.inv;
+  document.getElementById('peCust').value  = r.cust;
+  document.getElementById('peTotal').value = r.total;
+  document.getElementById('pePaid').value  = r.paid;
+  document.getElementById('peMeth').value  = r.sMethod || 'Cash';
+  document.getElementById('peDue').value   = r.due;
+  document.getElementById('peNote').value  = r.sNote || '';
+  document.getElementById('payEditOverlay').classList.add('open');
+}
+
+function savePayEdit() {
+  const r = payData.find(i => i.id === payEditId);
+  if (!r) return;
+  const total = parseFloat(document.getElementById('peTotal').value) || 0;
+  const paid  = parseFloat(document.getElementById('pePaid').value)  || 0;
+  if (total <= 0) { showToast('⚠️ Total must be greater than 0', true); return; }
+  if (paid > total) { showToast('⚠️ Paid cannot exceed total', true); return; }
+  r.total   = total;
+  r.paid    = paid;
+  r.sMethod = document.getElementById('peMeth').value;
+  r.due     = document.getElementById('peDue').value;
+  r.sNote   = document.getElementById('peNote').value;
+  r.settled = paid > 0 ? paid : null;
+  r.editing = false;
+  closePayModals();
+  payRender();
+  showToast('✅ Payment record updated');
+}
+
+function openPayDelModal(id) {
+  const r = payData.find(i => i.id === id);
+  if (!r) return;
+  payDelId = id;
+  document.getElementById('payDelName').textContent = r.inv + ' (' + r.cust + ')';
+  document.getElementById('payDelOverlay').classList.add('open');
+}
+
+function confirmPayDelete() {
+  payData = payData.filter(i => i.id !== payDelId);
+  closePayModals();
+  payRender();
+  showToast('🗑️ Payment record deleted', true);
+}
+
+function closePayModals() {
+  document.getElementById('payEditOverlay').classList.remove('open');
+  document.getElementById('payDelOverlay').classList.remove('open');
+}
+
+document.getElementById('payEditOverlay')?.addEventListener('click', e => {
+  if (e.target === e.currentTarget) closePayModals();
+});
+document.getElementById('payDelOverlay')?.addEventListener('click', e => {
+  if (e.target === e.currentTarget) closePayModals();
+});
 </script>
 </body>
 </html>

@@ -1,0 +1,349 @@
+
+<h2 class="sr-only">Invoice settlement table — enter amount to settle, edit or undo after confirming</h2>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+.wrap{padding:0 0 1.5rem;font-size:13px}
+.toolbar{display:flex;align-items:center;gap:10px;margin-bottom:1rem}
+.sb{position:relative;flex:1;min-width:0}
+.sb i{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--color-text-secondary);pointer-events:none}
+.sb input{width:100%;padding:7px 10px 7px 32px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;outline:none}
+.sb input:focus{border-color:#378ADD;box-shadow:0 0 0 3px rgba(55,138,221,0.1)}
+.sb input::placeholder{color:var(--color-text-tertiary)}
+select.flt{padding:7px 10px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;outline:none;flex-shrink:0;cursor:pointer}
+.tbl-wrap{border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-lg);overflow:hidden}
+table{width:100%;border-collapse:collapse;table-layout:fixed}
+thead tr{background:var(--color-background-secondary)}
+th{padding:10px 14px;text-align:left;font-size:11px;font-weight:500;color:var(--color-text-secondary);text-transform:uppercase;letter-spacing:0.6px;border-bottom:0.5px solid var(--color-border-tertiary);cursor:pointer;user-select:none;white-space:nowrap}
+th:hover{color:var(--color-text-primary)}
+th .si{margin-left:3px;opacity:0.4;font-size:10px}
+tbody tr{border-bottom:0.5px solid var(--color-border-tertiary);transition:background 0.1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover td{background:var(--color-background-secondary)}
+tbody tr.settled-row td{background:var(--color-background-secondary)}
+td{padding:11px 14px;vertical-align:middle;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.inv-pill{font-family:var(--font-mono);font-size:11px;color:#0C447C;background:#E6F1FB;padding:3px 7px;border-radius:5px;border:0.5px solid #B5D4F4;display:inline-block}
+.cname{font-weight:500;font-size:13px;color:var(--color-text-primary)}
+.ctype{font-size:11px;color:var(--color-text-secondary);margin-top:1px}
+.mono{font-family:var(--font-mono);font-size:13px;color:var(--color-text-primary)}
+.red-mono{font-family:var(--font-mono);font-size:13px;color:#A32D2D}
+.badge{display:inline-flex;align-items:center;gap:4px;padding:3px 9px;border-radius:20px;font-size:11px;font-weight:500}
+.badge::before{content:'';width:5px;height:5px;border-radius:50%;display:block}
+.b-paid{background:#EAF3DE;color:#27500A}.b-paid::before{background:#639922}
+.b-partial{background:#FAEEDA;color:#633806}.b-partial::before{background:#BA7517}
+.b-pending{background:#E6F1FB;color:#0C447C}.b-pending::before{background:#378ADD}
+.b-overdue{background:#FCEBEB;color:#791F1F}.b-overdue::before{background:#E24B4A}
+.pay-cell{display:flex;align-items:center;gap:6px}
+.amt-inp{width:105px;padding:6px 9px;border:0.5px solid var(--color-border-tertiary);border-radius:var(--border-radius-md);background:var(--color-background-primary);color:var(--color-text-primary);font-size:13px;font-family:var(--font-mono);outline:none;text-align:right}
+.amt-inp:focus{border-color:#378ADD;box-shadow:0 0 0 2px rgba(55,138,221,0.12)}
+.amt-inp.is-full{border-color:#639922;background:#EAF3DE;color:#27500A}
+.amt-inp.is-over{border-color:#E24B4A;background:#FCEBEB;color:#A32D2D}
+.sprev{font-size:11px;font-weight:500;padding:2px 7px;border-radius:20px;white-space:nowrap;display:none}
+.sprev.show{display:inline-flex;align-items:center;gap:3px}
+.sprev.sp-paid{background:#EAF3DE;color:#27500A}
+.sprev.sp-partial{background:#FAEEDA;color:#633806}
+.cbtn{padding:5px 11px;border-radius:var(--border-radius-md);border:none;background:#378ADD;color:#fff;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap;transition:background 0.12s;flex-shrink:0}
+.cbtn:hover{background:#185FA5}
+.cbtn:disabled{opacity:0.35;cursor:default}
+.settled-cell{display:flex;align-items:center;gap:8px}
+.settled-info{display:flex;flex-direction:column;gap:1px}
+.settled-amt{font-family:var(--font-mono);font-size:13px;font-weight:500;color:#27500A}
+.settled-sub{font-size:11px;color:var(--color-text-secondary)}
+.act-btns{display:flex;gap:5px;margin-left:auto;flex-shrink:0}
+.ibtn{width:28px;height:28px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);background:transparent;display:flex;align-items:center;justify-content:center;cursor:pointer;color:var(--color-text-secondary);transition:all 0.12s;flex-shrink:0}
+.ibtn i{font-size:14px}
+.ibtn.iedit:hover{border-color:#B5D4F4;background:#E6F1FB;color:#0C447C}
+.ibtn.iundo:hover{border-color:#F7C1C1;background:#FCEBEB;color:#A32D2D}
+.edit-inp{width:105px;padding:5px 9px;border:1.5px solid #378ADD;border-radius:var(--border-radius-md);background:#fff;color:var(--color-text-primary);font-size:13px;font-family:var(--font-mono);outline:none;text-align:right;box-shadow:0 0 0 3px rgba(55,138,221,0.12)}
+.save-btn{padding:4px 10px;border-radius:var(--border-radius-md);border:none;background:#378ADD;color:#fff;font-size:12px;font-weight:500;cursor:pointer;white-space:nowrap}
+.save-btn:hover{background:#185FA5}
+.cancel-edit-btn{padding:4px 8px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);background:transparent;color:var(--color-text-secondary);font-size:12px;cursor:pointer}
+.cancel-edit-btn:hover{background:var(--color-background-secondary)}
+.prog-wrap{width:48px;height:4px;background:var(--color-border-tertiary);border-radius:3px;display:inline-block;vertical-align:middle;margin-left:5px}
+.prog-bar{height:4px;border-radius:3px}
+.due-ok{color:var(--color-text-secondary);font-size:12px}
+.due-warn{color:#854F0B;font-size:12px;font-weight:500}
+.due-over{color:#A32D2D;font-size:12px;font-weight:500}
+.footer{display:flex;align-items:center;justify-content:space-between;padding:10px 14px;border-top:0.5px solid var(--color-border-tertiary);background:var(--color-background-secondary);font-size:12px;color:var(--color-text-secondary)}
+.pag{display:flex;gap:4px}
+.pb{min-width:28px;height:28px;padding:0 6px;border-radius:var(--border-radius-md);border:0.5px solid var(--color-border-tertiary);background:transparent;color:var(--color-text-primary);font-size:12px;cursor:pointer;transition:all 0.12s}
+.pb:hover:not(:disabled):not(.active){background:var(--color-background-primary)}
+.pb:disabled{opacity:0.35;cursor:default}
+.pb.active{background:#378ADD;border-color:#378ADD;color:#fff}
+</style>
+
+<div class="wrap">
+  <div class="toolbar">
+    <div class="sb">
+      <i class="ti ti-search" aria-hidden="true"></i>
+      <input type="text" id="srch" placeholder="Search invoice or customer..." oninput="render()">
+    </div>
+    <select class="flt" id="sflt" onchange="render()">
+      <option value="">All statuses</option>
+      <option value="Pending">Pending</option>
+      <option value="Partial">Partial</option>
+      <option value="Overdue">Overdue</option>
+      <option value="Paid">Paid</option>
+    </select>
+    <select class="flt" id="ppflt" onchange="ppCh()">
+      <option value="6">6 per page</option>
+      <option value="10">10 per page</option>
+    </select>
+  </div>
+
+  <div class="tbl-wrap">
+    <table>
+      <thead><tr>
+        <th style="width:108px" onclick="sortBy('inv')">Invoice <span class="si" id="ss-inv">↕</span></th>
+        <th style="width:155px" onclick="sortBy('cust')">Customer <span class="si" id="ss-cust">↕</span></th>
+        <th style="width:88px" onclick="sortBy('due')">Due date <span class="si" id="ss-due">↕</span></th>
+        <th style="width:100px" onclick="sortBy('total')">Total <span class="si" id="ss-total">↕</span></th>
+        <th style="width:100px" onclick="sortBy('bal')">Balance <span class="si" id="ss-bal">↕</span></th>
+        <th style="width:82px">Status</th>
+        <th>Collect payment</th>
+      </tr></thead>
+      <tbody id="tbody"></tbody>
+    </table>
+    <div class="footer">
+      <span id="pgInfo"></span>
+      <div class="pag" id="pagBtns"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+const today = new Date('2026-05-27');
+const data = [
+  {id:1,inv:'#SS-1031',cust:'Ravi Kumar',      type:'Retail',   due:'2026-05-20',total:5000, paid:0,    settled:null, editing:false},
+  {id:2,inv:'#SS-1030',cust:'Meena Textiles',  type:'Business', due:'2026-05-15',total:8750, paid:3500, settled:null, editing:false},
+  {id:3,inv:'#SS-1029',cust:'Anand Stores',    type:'Wholesale',due:'2026-06-01',total:560,  paid:560,  settled:null, editing:false},
+  {id:4,inv:'#SS-1028',cust:'Kavitha Electronics',type:'Business',due:'2026-04-30',total:12400,paid:5000,settled:null,editing:false},
+  {id:5,inv:'#SS-1027',cust:'Selvam Traders',  type:'Wholesale',due:'2026-04-25',total:1890, paid:0,    settled:null, editing:false},
+  {id:6,inv:'#SS-1026',cust:'Priya Fashions',  type:'Retail',   due:'2026-05-28',total:3200, paid:1600, settled:null, editing:false},
+  {id:7,inv:'#SS-1025',cust:'Kumar Hardware',  type:'Business', due:'2026-05-10',total:7450, paid:0,    settled:null, editing:false},
+  {id:8,inv:'#SS-1024',cust:'Nair Distributors',type:'Wholesale',due:'2026-06-05',total:15200,paid:15200,settled:null,editing:false},
+  {id:9,inv:'#SS-1023',cust:'Lakshmi Stores',  type:'Retail',   due:'2026-04-18',total:920,  paid:0,    settled:null, editing:false},
+  {id:10,inv:'#SS-1022',cust:'Sri Balaji Traders',type:'Business',due:'2026-05-30',total:4600,paid:2000,settled:null,editing:false},
+];
+
+function calcStatus(inv){
+  if(inv.paid>=inv.total) return 'Paid';
+  const d=new Date(inv.due);
+  if(inv.paid>0) return 'Partial';
+  if(d<today) return 'Overdue';
+  return 'Pending';
+}
+function dueLabel(dueStr){
+  const d=new Date(dueStr), diff=Math.round((d-today)/86400000);
+  if(diff<0) return {txt:Math.abs(diff)+'d overdue',cls:'due-over'};
+  if(diff===0) return {txt:'Due today',cls:'due-warn'};
+  if(diff<=7) return {txt:'In '+diff+'d',cls:'due-warn'};
+  return {txt:d.toLocaleDateString('en-IN',{day:'2-digit',month:'short'}),cls:'due-ok'};
+}
+function fmt(n){return '₹'+Math.round(n).toLocaleString('en-IN')}
+function badgeCls(s){return s==='Paid'?'b-paid':s==='Partial'?'b-partial':s==='Overdue'?'b-overdue':'b-pending'}
+
+let sk='due',sa=true,pg=1,pp=6;
+
+function filtered(){
+  const q=(document.getElementById('srch').value||'').toLowerCase();
+  const sf=document.getElementById('sflt').value;
+  return data.filter(i=>
+    (!q||i.inv.toLowerCase().includes(q)||i.cust.toLowerCase().includes(q))&&
+    (!sf||calcStatus(i)===sf)
+  ).sort((a,b)=>{
+    let va,vb;
+    if(sk==='bal'){va=a.total-a.paid;vb=b.total-b.paid;}
+    else if(sk==='due'){va=a.due;vb=b.due;}
+    else if(sk==='total'){va=a.total;vb=b.total;}
+    else{va=a[sk==='inv'?'inv':'cust'];vb=b[sk==='inv'?'inv':'cust'];}
+    if(typeof va==='string'){va=va.toLowerCase();vb=vb.toLowerCase();}
+    return sa?(va>vb?1:-1):(va<vb?1:-1);
+  });
+}
+
+function render(){
+  const list=filtered(), total=list.length;
+  const pages=Math.max(1,Math.ceil(total/pp));
+  if(pg>pages) pg=pages;
+  const slice=list.slice((pg-1)*pp,pg*pp);
+
+  document.getElementById('tbody').innerHTML = slice.map(inv=>{
+    const s=calcStatus(inv), bal=inv.total-inv.paid;
+    const pct=Math.round((inv.paid/inv.total)*100);
+    const dl=dueLabel(inv.due);
+    const barColor=pct===100?'#639922':pct>0?'#BA7517':'#B5D4F4';
+
+    if(inv.settled!==null && !inv.editing){
+      const newPaid=inv.paid;
+      const newBal=inv.total-newPaid;
+      const ns=calcStatus(inv);
+      return `<tr class="settled-row" id="tr-${inv.id}">
+        <td><span class="inv-pill">${inv.inv}</span></td>
+        <td><div class="cname">${inv.cust}</div><div class="ctype">${inv.type}</div></td>
+        <td><span class="${dl.cls}">${dl.txt}</span></td>
+        <td><span class="mono">${fmt(inv.total)}<span class="prog-wrap"><span class="prog-bar" style="width:${pct}%;background:${barColor}"></span></span></span></td>
+        <td><span class="${newBal>0?'red-mono':'mono'}">${fmt(newBal)}</span></td>
+        <td><span class="badge ${badgeCls(ns)}">${ns}</span></td>
+        <td>
+          <div class="settled-cell">
+            <i class="ti ti-circle-check" style="font-size:16px;color:#3B6D11;flex-shrink:0" aria-hidden="true"></i>
+            <div class="settled-info">
+              <span class="settled-amt">${fmt(inv.settled)} collected</span>
+              <span class="settled-sub">Settled just now</span>
+            </div>
+            <div class="act-btns">
+              <button class="ibtn iedit" title="Edit settlement" aria-label="Edit settlement" onclick="startEdit(${inv.id})"><i class="ti ti-edit"></i></button>
+              <button class="ibtn iundo" title="Undo settlement" aria-label="Undo settlement" onclick="undoSettle(${inv.id})"><i class="ti ti-arrow-back-up"></i></button>
+            </div>
+          </div>
+        </td>
+      </tr>`;
+    }
+
+    if(inv.editing){
+      return `<tr class="settled-row" id="tr-${inv.id}">
+        <td><span class="inv-pill">${inv.inv}</span></td>
+        <td><div class="cname">${inv.cust}</div><div class="ctype">${inv.type}</div></td>
+        <td><span class="${dl.cls}">${dl.txt}</span></td>
+        <td><span class="mono">${fmt(inv.total)}<span class="prog-wrap"><span class="prog-bar" style="width:${pct}%;background:${barColor}"></span></span></span></td>
+        <td><span class="${bal>0?'red-mono':'mono'}">${fmt(bal)}</span></td>
+        <td><span class="badge ${badgeCls(s)}">${s}</span></td>
+        <td>
+          <div class="pay-cell">
+            <input class="edit-inp" type="number" id="edit-${inv.id}" value="${inv.settled}" min="1" max="${inv.total}" step="1"
+              onkeydown="if(event.key==='Enter')saveEdit(${inv.id},${inv.total})">
+            <button class="save-btn" onclick="saveEdit(${inv.id},${inv.total})">Save</button>
+            <button class="cancel-edit-btn" onclick="cancelEdit(${inv.id})">Cancel</button>
+          </div>
+        </td>
+      </tr>`;
+    }
+
+    const isPaid=s==='Paid';
+    if(isPaid){
+      return `<tr id="tr-${inv.id}">
+        <td><span class="inv-pill">${inv.inv}</span></td>
+        <td><div class="cname">${inv.cust}</div><div class="ctype">${inv.type}</div></td>
+        <td><span class="${dl.cls}">${dl.txt}</span></td>
+        <td><span class="mono">${fmt(inv.total)}<span class="prog-wrap"><span class="prog-bar" style="width:100%;background:#639922"></span></span></span></td>
+        <td><span class="mono" style="color:#3B6D11">${fmt(0)}</span></td>
+        <td><span class="badge b-paid">Paid</span></td>
+        <td><span style="font-size:12px;color:var(--color-text-tertiary)">Already closed</span></td>
+      </tr>`;
+    }
+
+    return `<tr id="tr-${inv.id}">
+      <td><span class="inv-pill">${inv.inv}</span></td>
+      <td><div class="cname">${inv.cust}</div><div class="ctype">${inv.type}</div></td>
+      <td><span class="${dl.cls}">${dl.txt}</span></td>
+      <td><span class="mono">${fmt(inv.total)}<span class="prog-wrap"><span class="prog-bar" style="width:${pct}%;background:${barColor}"></span></span></span></td>
+      <td><span class="${bal>0?'red-mono':'mono'}">${fmt(bal)}</span></td>
+      <td><span class="badge ${badgeCls(s)}">${s}</span></td>
+      <td>
+        <div class="pay-cell">
+          <input class="amt-inp" type="number" id="amt-${inv.id}" placeholder="${Math.round(bal)}" min="1" max="${bal}" step="1"
+            oninput="onAmt(${inv.id},${bal})" onkeydown="if(event.key==='Enter')doSettle(${inv.id},${bal})">
+          <span class="sprev" id="sprev-${inv.id}"></span>
+          <button class="cbtn" id="cbtn-${inv.id}" onclick="doSettle(${inv.id},${bal})" disabled>Confirm</button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  const start=total===0?0:(pg-1)*pp+1;
+  document.getElementById('pgInfo').textContent=`Showing ${start}–${Math.min(pg*pp,total)} of ${total} invoices`;
+
+  let btns=`<button class="pb" onclick="gp(${pg-1})" ${pg===1?'disabled':''}>← Prev</button>`;
+  for(let p=1;p<=pages;p++){
+    if(pages<=7||Math.abs(p-pg)<=1||p===1||p===pages)
+      btns+=`<button class="pb${p===pg?' active':''}" onclick="gp(${p})">${p}</button>`;
+    else if(Math.abs(p-pg)===2) btns+=`<span style="padding:0 2px;color:var(--color-text-tertiary)">…</span>`;
+  }
+  btns+=`<button class="pb" onclick="gp(${pg+1})" ${pg===pages?'disabled':''}>Next →</button>`;
+  document.getElementById('pagBtns').innerHTML=btns;
+
+  ['inv','cust','due','total','bal'].forEach(k=>{
+    const el=document.getElementById('ss-'+k);
+    if(!el) return;
+    el.textContent=sk===k?(sa?'↑':'↓'):'↕';
+  });
+}
+
+function onAmt(id,bal){
+  const inp=document.getElementById('amt-'+id);
+  const btn=document.getElementById('cbtn-'+id);
+  const sp=document.getElementById('sprev-'+id);
+  const val=parseFloat(inp.value)||0;
+  inp.className='amt-inp';
+  sp.className='sprev';
+  sp.textContent='';
+  btn.disabled=true;
+  if(val<=0||val>bal){if(val>bal)inp.className='amt-inp is-over';return;}
+  btn.disabled=false;
+  if(val===bal){
+    inp.className='amt-inp is-full';
+    sp.className='sprev show sp-paid';
+    sp.innerHTML='<i class="ti ti-check" style="font-size:12px" aria-hidden="true"></i> Paid';
+  } else {
+    sp.className='sprev show sp-partial';
+    sp.textContent='Partial';
+  }
+}
+
+function doSettle(id,bal){
+  const inp=document.getElementById('amt-'+id);
+  const val=parseFloat(inp.value)||0;
+  if(val<=0||val>bal) return;
+  const inv=data.find(i=>i.id===id); if(!inv) return;
+  inv.paid=Math.min(inv.paid+val,inv.total);
+  inv.settled=val;
+  inv.editing=false;
+  render();
+}
+
+function startEdit(id){
+  data.forEach(i=>{ if(i.id!==id) i.editing=false; });
+  const inv=data.find(i=>i.id===id); if(!inv) return;
+  inv.editing=true;
+  render();
+  setTimeout(()=>{
+    const el=document.getElementById('edit-'+id);
+    if(el){el.focus();el.select();}
+  },30);
+}
+
+function saveEdit(id,invoiceTotal){
+  const inp=document.getElementById('edit-'+id);
+  const newVal=parseFloat(inp.value)||0;
+  const inv=data.find(i=>i.id===id); if(!inv) return;
+  if(newVal<=0||newVal>invoiceTotal){
+    inp.style.borderColor='#E24B4A';
+    inp.style.background='#FCEBEB';
+    return;
+  }
+  const oldSettled=inv.settled||0;
+  inv.paid=Math.min(inv.paid - oldSettled + newVal, invoiceTotal);
+  inv.settled=newVal;
+  inv.editing=false;
+  render();
+}
+
+function cancelEdit(id){
+  const inv=data.find(i=>i.id===id); if(!inv) return;
+  inv.editing=false;
+  render();
+}
+
+function undoSettle(id){
+  const inv=data.find(i=>i.id===id); if(!inv) return;
+  inv.paid=Math.max(0, inv.paid-(inv.settled||0));
+  inv.settled=null;
+  inv.editing=false;
+  render();
+}
+
+function sortBy(k){if(sk===k)sa=!sa;else{sk=k;sa=true;}pg=1;render();}
+function gp(p){pg=p;render();}
+function ppCh(){pp=parseInt(document.getElementById('ppflt').value);pg=1;render();}
+render();
+</script>
