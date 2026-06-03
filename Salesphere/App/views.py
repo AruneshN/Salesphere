@@ -5,8 +5,8 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import authenticate,login,logout
 from . import forms
 from .forms import Registeruser,Userstore,Productform,Customerform,Billform,Billitemform
-from .models import Bill,Product,Customer
-from django.db.models import F
+from .models import Bill,Product,Customer,Billitem
+from django.db.models import F,Sum
 from datetime import date,timedelta
 from django.utils import timezone
 
@@ -71,6 +71,7 @@ class dashboard(LoginRequiredMixin,TemplateView):
         total_products=Product.objects.count()
         total_customer=Customer.objects.count()
         total_bill=Bill.objects.count()
+        
 
         # current month revenue
         date=timezone.now().date()
@@ -83,6 +84,14 @@ class dashboard(LoginRequiredMixin,TemplateView):
         data=[]
         for i in week_data:
             data.append(float(i.grand_total))
+
+        # top selling Products:
+    
+        top_products=(Billitem.objects.values("product_name").annotate(total_sold=Sum("quantity")).order_by("-total_sold")) #top sold products    
+        max_sold=top_products[0] ["total_sold"] if top_products else 1 # if no products sold return 0
+        for products in top_products:
+            products["percentage"]=(products["total_sold"] / max_sold)* 100 # calculate number of percentage
+
         return render(request,self.template_name,context={
             "total_products":total_products,
             "total_customer":total_customer,
@@ -91,7 +100,8 @@ class dashboard(LoginRequiredMixin,TemplateView):
             "week_sales_data":data,
             "week_total_amount": sum(data),
             "peek_day":max(data),
-            "Avg_day":min(data)
+            "Avg_day":min(data),
+            "top_products":top_products
         })
 
 

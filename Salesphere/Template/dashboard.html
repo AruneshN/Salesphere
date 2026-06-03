@@ -744,7 +744,7 @@ td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:ellipsi
         <table>
           <thead><tr><th>Bill no.</th><th>Customer</th><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
           <tbody>
-            {% for invoice in bills %}
+            {% for invoice in bills|slice:":6" %}
             <tr><td><span class="bill-no">{{invoice.Bill_num}}</span></td><td>{{invoice.customer.name}}</td>
               <td style="color:var(--text-muted)">
                 {% if invoice.created_at.date == today %}
@@ -774,12 +774,14 @@ td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:ellipsi
       </div>
       <div class="card">
         <div class="card-header"><div class="card-title">Top selling products</div><div style="font-size:10px;color:var(--text-muted)">This month</div></div>
-        <div class="topsell-row"><div class="topsell-rank">01</div><div class="topsell-name">LED Bulb 9W Pack</div><div class="topsell-bar-wrap"><div class="topsell-bar" style="width:100%"></div></div><div class="topsell-qty">342</div></div>
-        <div class="topsell-row"><div class="topsell-rank">02</div><div class="topsell-name">USB-C Cable 2m</div><div class="topsell-bar-wrap"><div class="topsell-bar" style="width:80%"></div></div><div class="topsell-qty">275</div></div>
-        <div class="topsell-row"><div class="topsell-rank">03</div><div class="topsell-name">Thermal Paste 5g</div><div class="topsell-bar-wrap"><div class="topsell-bar" style="width:62%"></div></div><div class="topsell-qty">213</div></div>
-        <div class="topsell-row"><div class="topsell-rank">04</div><div class="topsell-name">AA Battery 8-pack</div><div class="topsell-bar-wrap"><div class="topsell-bar" style="width:50%"></div></div><div class="topsell-qty">172</div></div>
-        <div class="topsell-row"><div class="topsell-rank">05</div><div class="topsell-name">HDMI Cable 1.5m</div><div class="topsell-bar-wrap"><div class="topsell-bar" style="width:38%"></div></div><div class="topsell-qty">131</div></div>
-        <div class="topsell-row"><div class="topsell-rank">06</div><div class="topsell-name">Surge Protector 6pt</div><div class="topsell-bar-wrap"><div class="topsell-bar" style="width:26%"></div></div><div class="topsell-qty">89</div></div>
+        {% for products in top_products %}
+        <div class="topsell-row">
+          <div class="topsell-rank">{{ forloop.counter }}</div>
+          <div class="topsell-name">{{products.product_name}}</div><div class="topsell-bar-wrap">
+            <div class="topsell-bar" style="width:{{products.percentage}}%"></div>
+          </div><div class="topsell-qty">{{products.total_sold|floatformat:0}}</div>
+        </div>
+        {% endfor %}
       </div>
     </div>
   </div>
