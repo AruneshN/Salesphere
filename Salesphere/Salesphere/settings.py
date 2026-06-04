@@ -23,9 +23,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 
 env = environ.Env()
-environ.Env.read_env(BASE_DIR / ".env.txt")
-# environ.Env.read_env(Path(__file__).resolve().parent / ".env.txt")
-
+env_file = Path(__file__).resolve().parent / ".env.txt"
+if env_file.exists():
+    environ.Env.read_env(env_file)
 
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env.bool('DEBUG')
@@ -104,10 +104,9 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 DATABASES = {
     'default': dj_database_url.config(
-        default=env('DATABASE_URL')
+        default=env('DATABASE_URL', default='postgresql://postgres:Arunesh5488@localhost:5432/salesphere_db')
     )
 }
-
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
