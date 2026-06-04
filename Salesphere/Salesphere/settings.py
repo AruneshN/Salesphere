@@ -12,6 +12,7 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 
 from pathlib import Path
 import environ
+import dj_database_url
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -22,8 +23,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 
 env = environ.Env()
-# environ.Env.read_env(BASE_DIR / ".env.txt")
-environ.Env.read_env(Path(__file__).resolve().parent / ".env.txt")
+environ.Env.read_env(BASE_DIR / ".env.txt")
+# environ.Env.read_env(Path(__file__).resolve().parent / ".env.txt")
 
 
 SECRET_KEY = env('SECRET_KEY')
@@ -33,7 +34,7 @@ DB_USER = env('DB_USER')
 DB_PASSWORD = env('DB_PASSWORD')
 # SECURITY WARNING: don't run with debug turned on in production!
 
-ALLOWED_HOSTS = ["salesphere.pythonanywhere.com", "127.0.0.1", "localhost"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", ".railway.app"]
 
 # Application definition
 
@@ -49,12 +50,16 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
+ 
+
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+
 ]
 
 ROOT_URLCONF = 'Salesphere.urls'
@@ -81,17 +86,28 @@ WSGI_APPLICATION = 'Salesphere.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/6.0/ref/settings/#databases
 
+# Static files
+STATIC_URL = '/static/'
+STATIC_ROOT = BASE_DIR / 'staticfiles'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# DATABASES = {
+#     'default': {
+#         'ENGINE': 'django.db.backends.postgresql',
+#         'NAME': env('DB_NAME', default='salesphere_db'),
+#         'USER': env('DB_USER', default='postgres'),
+#         'PASSWORD': env('DB_PASSWORD', default=''),
+#         'HOST': env('DB_HOST', default='localhost'),
+#         'PORT': env('DB_PORT', default='5432'),
+#     }
+# }
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': env('DB_NAME', default='salesphere_db'),
-        'USER': env('DB_USER', default='postgres'),
-        'PASSWORD': env('DB_PASSWORD', default=''),
-        'HOST': env('DB_HOST', default='localhost'),
-        'PORT': env('DB_PORT', default='5432'),
-    }
+    'default': dj_database_url.config(
+        default=env('DATABASE_URL')
+    )
 }
+
 # Password validation
 # https://docs.djangoproject.com/en/6.0/ref/settings/#auth-password-validators
 
@@ -126,7 +142,6 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
-STATIC_URL = 'static/'
 
 
 SESSION_EXPIRE_AT_BROWSER_CLOSE = False
