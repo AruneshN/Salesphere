@@ -29,9 +29,7 @@ if env_file.exists():
 
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env.bool('DEBUG')
-DB_NAME = env('DB_NAME')
-DB_USER = env('DB_USER')
-DB_PASSWORD = env('DB_PASSWORD')
+
 # SECURITY WARNING: don't run with debug turned on in production!
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", ".railway.app"]
