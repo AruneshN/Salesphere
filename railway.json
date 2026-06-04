@@ -1,8 +1,9 @@
 {
   "build": {
-    "builder": "NIXPACKS"
+    "builder": "NIXPACKS",
+    "buildCommand": "pip install -r Salesphere/requirements.txt"
   },
   "deploy": {
-    "startCommand": "cd Salesphere && gunicorn Salesphere.wsgi"
+    "startCommand": "cd Salesphere && python manage.py migrate && gunicorn Salesphere.wsgi"
   }
 }
