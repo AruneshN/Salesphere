@@ -1,7 +1,7 @@
 {
   "build": {
     "builder": "NIXPACKS",
-    "buildCommand": "pip install -r Salesphere/requirements.txt"
+    "buildCommand": "pip install -r Salesphere/requirements.txt && cd Salesphere && python manage.py collectstatic --noinput"
   },
   "deploy": {
     "startCommand": "cd Salesphere && python manage.py migrate && gunicorn Salesphere.wsgi"
