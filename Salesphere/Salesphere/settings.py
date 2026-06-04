@@ -22,7 +22,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # SECURITY WARNING: keep the secret key used in production secret!
 
 env = environ.Env()
-environ.Env.read_env(BASE_DIR / ".env.txt")
+# environ.Env.read_env(BASE_DIR / ".env.txt")
+environ.Env.read_env(Path(__file__).resolve().parent / ".env.txt")
+
 
 SECRET_KEY = env('SECRET_KEY')
 DEBUG = env.bool('DEBUG')
