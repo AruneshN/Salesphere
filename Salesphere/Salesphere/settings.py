@@ -33,6 +33,8 @@ DEBUG = env.bool('DEBUG')
 # SECURITY WARNING: don't run with debug turned on in production!
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", ".railway.app"]
+CSRF_TRUSTED_ORIGINS = ["https://salesphere-production.up.railway.app"]
+
 
 # Application definition
 
