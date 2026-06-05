@@ -12,6 +12,7 @@ urlpatterns = [
     path("add_customer/",views.add_customer.as_view(),name="add-customer"),
     path("create_bill/",views.createbill.as_view(),name="create-bill"),
     path("stock_alert/",views.stock_alert.as_view(),name="stock-alert"),
+    path("stock/update/<int:product_id>/", views.update_stock, name="update-stock"),
     path("allstocks/",views.Allproducts.as_view()),
     path("payments/",views.payment.as_view(),name="invoice-payment")
 

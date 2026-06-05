@@ -4,6 +4,8 @@
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>SaleSphere — Billing + Inventory</title>
+<meta name="csrf-token" content="{{ csrf_token }}">
+
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Space+Mono:wght@400;700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet"/>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
@@ -740,7 +742,7 @@ td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:ellipsi
     </div>
     <div class="three-col">
       <div class="card" style="grid-column:span 2">
-        <div class="card-header"><div class="card-title">Recent bills</div><button class="btn btn-ghost" style="font-size:11px;padding:5px 11px" onclick="window.location.href='{% url 'create-bill' %}'">View all →</button></div>
+        <div class="card-header"><div class="card-title">Recent bills</div><button class="btn btn-ghost" style="font-size:11px;padding:5px 11px" onclick="window.location.href='{% url 'invoice-payment' %}'">View all →</button></div>
         <table>
           <thead><tr><th>Bill no.</th><th>Customer</th><th>Date</th><th>Amount</th><th>Status</th></tr></thead>
           <tbody>
@@ -908,7 +910,7 @@ td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:ellipsi
       <table>
         <thead><tr><th>Bill No.</th><th>Customer</th><th>Date</th><th>Items</th><th>Amount</th><th>Payment</th><th>Status</th><th></th></tr></thead>
         <tbody>
-                  {% for invoice in bills %}
+                  {% for invoice in bills|slice:":10" %}
                   <tr><td><span class="bill-no">{{invoice.Bill_num}}</span></td><td><span class="av" style="background:#eff3ff;color:#2563ff">{{invoice.customer.name|slice:":1"}}</span>{{invoice.customer.name}}</td>
                     <td style="color:var(--text-muted)">
                       {% if invoice.created_at.date == today %}
@@ -1555,21 +1557,67 @@ function openEditModal(id) {
   document.getElementById('fPrice').value = item.price;
   document.getElementById('fLastSold').value = item.lastSold || '';
   document.getElementById('editOverlay').classList.add('open');
+ }
+
+function getCookie() {
+    return document.querySelector('meta[name="csrf-token"]').content;
 }
-function saveStockItem() {
+async function saveStockItem() {
   const sku=document.getElementById('fSku').value.trim();
   const name=document.getElementById('fName').value.trim();
   if (!sku||!name) { alert('SKU and name are required.'); return; }
-  const p={sku,name,category:document.getElementById('fCat').value,qty:parseInt(document.getElementById('fQty').value)||0,min:parseInt(document.getElementById('fMin').value)||0,price:parseFloat(document.getElementById('fPrice').value)||0,lastSold:document.getElementById('fLastSold').value.trim()||'N/A'};
-  if (editId===null) { stock.push({id:nextId++,...p}); showToast('Item added'); }
-  else { const idx=stock.findIndex(i=>i.id===editId); if (idx>-1) stock[idx]={...stock[idx],...p}; showToast('Item updated'); }
+  const p={
+  sku,name,category:document.getElementById('fCat').value,
+  qty:parseInt(document.getElementById('fQty').value)||0,
+  min:parseInt(document.getElementById('fMin').value)||0,
+  price:parseFloat(document.getElementById('fPrice').value)||0,
+  lastSold:document.getElementById('fLastSold').value.trim()||'N/A'};
+
+  if (editId !== null) {
+        // UPDATE existing product in DB
+        try {
+            const res = await fetch(`/stock/update/${editId}/`, {
+    method:  'POST',
+    headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken':  getCookie()   // ← no argument
+    },
+    body: JSON.stringify(p)
+});
+            const data = await res.json();
+            if (!data.ok) { showToast('⚠️ ' + data.error, true); return; }
+
+            const idx = stock.findIndex(i => i.id === editId);
+            if (idx > -1) stock[idx] = { ...stock[idx], ...p };
+            showToast('✅ Stock updated');
+        } catch {
+            showToast('⚠️ Network error', true); return;
+        }
+    } else {
+        // ADD new — no DB call here yet; wire up a create view if needed
+        stock.push({ id: nextId++, ...p });
+        showToast('Item added (local only — add a create view to persist)');
+    }
   closeModals(); renderStockTable();
 }
-function openDelModal(id) {
-  const item=stock.find(i=>i.id===id); if (!item) return;
-  delId=id;
-  document.getElementById('delName').textContent=item.name;
-  document.getElementById('delOverlay').classList.add('open');
+
+async function confirmDelete() {
+    try {
+        const res  = await fetch(`/stock/update/${delId}/`, {
+            method:  'DELETE',
+            headers: { 'X-CSRFToken': document.querySelector('meta[name="csrf-token"]').content }
+        });
+        const data = await res.json();
+        if (!data.ok) { showToast('⚠️ ' + data.error, true); return; }
+
+        stock = stock.filter(i => i.id !== delId);
+        showToast('Item deleted', true);
+        closeModals();
+        renderStockTable();
+    } catch (err) {
+        console.error(err);
+        showToast('⚠️ ' + err.message, true);
+    }
 }
 function confirmDelete() {
   stock=stock.filter(i=>i.id!==delId);

@@ -9,7 +9,9 @@ from .models import Bill,Product,Customer,Billitem
 from django.db.models import F,Sum
 from datetime import date,timedelta
 from django.utils import timezone
-
+import json
+from django.views.decorators.http import require_http_methods
+from django.contrib.auth.decorators import login_required
 
 # Create your views here.
 
@@ -230,6 +232,36 @@ class stock_alert(LoginRequiredMixin,TemplateView):
                 'skus':skus
             }
         )
+    def post(self,request,*args,**kwargs):
+        data = json.loads(request.body)
+        Products=Product.objects.get(sku=data['sku'])
+        breakpoint()
+
+@login_required
+@require_http_methods(["POST","DELETE"])
+def update_stock(request,product_id):
+    try:
+        product=Product.objects.get(id=product_id)
+    except Product.DoesNotExist:
+        return JsonResponse({'ok': False, 'error': 'Product not found'}, status=404)
+ 
+    if request.method == "DELETE":
+        product.delete()
+        return JsonResponse({'ok': True})
+
+    try:
+        data=json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({'ok': False, 'error': 'Invalid JSON'}, status=400)
+    
+    if 'name'  in data: product.product_name  = data['name']
+    if 'sku'   in data: product.product_code   = data['sku']
+    if 'qty'   in data: product.current_stock  = int(data['qty'])
+    if 'min'   in data: product.minimum_stock  = int(data['min'])
+    if 'price' in data: product.selling_price  = float(data['price'])
+    product.save()
+    return JsonResponse({'ok': True, 'id': product.id})
+
 
 class Allproducts(LoginRequiredMixin, TemplateView):
     template_name = "dashboard.html"
