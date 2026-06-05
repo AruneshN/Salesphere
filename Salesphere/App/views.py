@@ -98,9 +98,9 @@ class dashboard(LoginRequiredMixin,TemplateView):
             "total_bill":total_bill,
             "this_month_revenue":this_month_revenue,
             "week_sales_data":data,
-            "week_total_amount": sum(data),
-            "peek_day":max(data),
-            "Avg_day":min(data),
+            "week_total_amount": sum(data) if data else 0,
+            "peek_day":max(data) if data else 0,
+            "Avg_day":min(data) if data else 0,
             "top_products":top_products
         })
 
