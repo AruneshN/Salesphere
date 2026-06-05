@@ -1,2 +1,2 @@
-"Salesphere/.env.txt" 
-"**/.env.txt" 
+.env.txt 
+**/.env.txt 
