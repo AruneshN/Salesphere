@@ -28,8 +28,8 @@ if env_file.exists():
     environ.Env.read_env(env_file)
 
 SECRET_KEY = env('SECRET_KEY')
-DEBUG = env.bool('DEBUG')
-
+# DEBUG = env.bool('DEBUG')
+DEBUG=True
 # SECURITY WARNING: don't run with debug turned on in production!
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", ".railway.app"]
