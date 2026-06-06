@@ -312,3 +312,102 @@ class payment(LoginRequiredMixin, TemplateView):
                           "unpaid_invoice":unpaid_inv
                       })
 
+@login_required
+@require_http_methods(["POST"])
+def collect_payment(request, invoice_id):
+    try:
+        data        = json.loads(request.body)
+        amount_paid = float(data.get('amount_paid', 0))
+        method      = data.get('method', 'Cash')
+
+        invoice = Bill.objects.get(id=invoice_id)
+
+        if amount_paid <= 0:
+            return JsonResponse({'ok': False, 'error': 'Amount must be greater than 0'})
+        if amount_paid > float(invoice.grand_total):
+            return JsonResponse({'ok': False, 'error': 'Amount exceeds invoice total'})
+
+        invoice.paid_amount    = amount_paid
+        invoice.payment_method = method
+        invoice.save()
+
+        return JsonResponse({
+            'ok':             True,
+            'paid_amount':    float(invoice.paid_amount),
+            'payment_status': invoice.payment_status,  # ✅ read it, don't set it
+            'payment_method': invoice.payment_method,
+        })
+
+    except Bill.DoesNotExist:
+        return JsonResponse({'ok': False, 'error': 'Invoice not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'ok': False, 'error': str(e)}, status=500)
+
+@login_required
+@require_http_methods(["POST"])
+def undo_payment(request, invoice_id):
+    try:
+        invoice = Bill.objects.get(id=invoice_id)
+        
+        invoice.paid_amount    = 0
+        invoice.payment_method = 'Cash'
+        invoice.save()
+
+        return JsonResponse({
+            'ok':             True,
+            'paid_amount':    float(invoice.paid_amount),
+            'payment_status': invoice.payment_status,  # read-only property
+            'payment_method': invoice.payment_method,
+        })
+
+    except Bill.DoesNotExist:
+        return JsonResponse({'ok': False, 'error': 'Invoice not found'}, status=404)
+    except Exception as e:
+        return JsonResponse({'ok': False, 'error': str(e)}, status=500)
+    
+
+@login_required
+@require_http_methods(["POST"])
+def edit_payment(request, invoice_id):
+    try:
+        data     = json.loads(request.body)
+        total    = float(data.get('total', 0))
+        paid     = float(data.get('paid', 0))
+        method   = data.get('method', 'Cash')
+        due_date = data.get('due_date', None)
+
+        if total <= 0:
+            return JsonResponse({'ok': False, 'error': 'Total must be greater than 0'})
+        if paid > total:
+            return JsonResponse({'ok': False, 'error': 'Paid amount cannot exceed total'})
+        if paid < 0:
+            return JsonResponse({'ok': False, 'error': 'Paid amount cannot be negative'})
+
+        invoice = Bill.objects.get(id=invoice_id)
+
+        # ✅ Only set real fields
+        invoice.grand_total    = total
+        invoice.paid_amount    = paid
+        invoice.payment_method = method
+
+        if due_date:
+            from datetime import datetime
+            invoice.due_date = datetime.strptime(due_date, '%Y-%m-%d').date()
+
+        invoice.save()
+
+        return JsonResponse({
+            'ok':             True,
+            'paid_amount':    float(invoice.paid_amount),
+            'grand_total':    float(invoice.grand_total),
+            'payment_status': invoice.payment_status,  # read-only property
+            'payment_method': invoice.payment_method,
+            'due_date':       str(invoice.due_date),
+        })
+
+    except Bill.DoesNotExist:
+        return JsonResponse({'ok': False, 'error': 'Invoice not found'}, status=404)
+    except ValueError as e:
+        return JsonResponse({'ok': False, 'error': 'Invalid date format: ' + str(e)}, status=400)
+    except Exception as e:
+        return JsonResponse({'ok': False, 'error': str(e)}, status=500)

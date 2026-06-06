@@ -14,6 +14,10 @@ urlpatterns = [
     path("stock_alert/",views.stock_alert.as_view(),name="stock-alert"),
     path("stock/update/<int:product_id>/", views.update_stock, name="update-stock"),
     path("allstocks/",views.Allproducts.as_view()),
-    path("payments/",views.payment.as_view(),name="invoice-payment")
+    path("payments/",views.payment.as_view(),name="invoice-payment"),
+path('payment_collect/<int:invoice_id>/', views.collect_payment, name='collect-payment'),
+path('payment_undo/<int:invoice_id>/',    views.undo_payment,    name='undo-payment'),
+    path('payment_edit/<int:invoice_id>/',    views.edit_payment,    name='edit-payment'),
+
 
 ]

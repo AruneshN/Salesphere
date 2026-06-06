@@ -2021,17 +2021,46 @@ function payOnAmt(id,bal){
   document.getElementById('pnote-'+id)?.classList.add('show');
 }
 
-function payDoSettle(id,bal){
-  const inp=document.getElementById('pamt-'+id);
-  const val=parseFloat(inp.value)||0;
-  if(val<=0||val>bal) return;
-  const r=payData.find(i=>i.id===id);if(!r)return;
-  r.paid=Math.min(r.paid+val,r.total);
-  r.settled=val;
-  r.sMethod=document.getElementById('pmth-'+id)?.value||'Cash';
-  r.sNote=document.getElementById('pnote-'+id)?.value||'';
-  r.editing=false;
-  payRender();
+function getCsrf() {
+  return document.querySelector('meta[name="csrf-token"]').content;
+}
+
+/* ── Confirm new payment ── */
+async function payDoSettle(id, bal) {
+  const inp = document.getElementById('pamt-' + id);
+  const val = parseFloat(inp.value) || 0;
+  if (val <= 0 || val > bal) return;
+
+  const r = payData.find(i => i.id === id);
+  if (!r) return;
+
+  try {
+    const res  = await fetch(`/payment_collect/${id}/`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+      body: JSON.stringify({
+        amount_paid: val,
+        method:      document.getElementById('pmth-' + id)?.value || 'Cash',
+        note:        document.getElementById('pnote-' + id)?.value || ''
+      })
+    });
+    const data = await res.json();
+
+    if (!data.ok) { showToast('⚠️ ' + data.error, true); return; }
+
+    // update local state to match DB response
+    r.paid    = data.paid_amount;
+    r.settled = val;
+    r.sMethod = data.payment_method;
+    r.sNote   = document.getElementById('pnote-' + id)?.value || '';
+    r.editing = false;
+
+    showToast('✅ Payment recorded');
+    payRender();
+
+  } catch (err) {
+    showToast('⚠️ Network error: ' + err.message, true);
+  }
 }
 
 function payStartEdit(id){
@@ -2041,25 +2070,79 @@ function payStartEdit(id){
   setTimeout(()=>{const el=document.getElementById('pedit-'+id);if(el){el.focus();el.select();}},30);
 }
 
-function paySaveEdit(id,total){
-  const inp=document.getElementById('pedit-'+id);
-  const nv=parseFloat(inp.value)||0;
-  const r=payData.find(i=>i.id===id);if(!r)return;
-  if(nv<=0||nv>total){inp.style.borderColor='#fca5a5';return;}
-  r.paid=Math.min(r.paid-(r.settled||0)+nv,total);
-  r.settled=nv;
-  r.sMethod=document.getElementById('pemth-'+id)?.value||r.sMethod;
-  r.sNote=document.getElementById('penote-'+id)?.value||'';
-  r.editing=false;payRender();
+/* ── Save inline edit ── */
+/* ── Save inline row edit ── */
+async function paySaveEdit(id, total) {
+  const inp = document.getElementById('pedit-' + id);
+  const nv  = parseFloat(inp.value) || 0;
+  const r   = payData.find(i => i.id === id);
+  if (!r) return;
+
+  if (nv <= 0 || nv > total) { 
+    inp.style.borderColor = '#fca5a5'; 
+    return; 
+  }
+
+  try {
+    const res  = await fetch(`/payment_edit/${id}/`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+      body: JSON.stringify({
+        total:    total,
+        paid:     nv,
+        method:   document.getElementById('pemth-' + id)?.value || r.sMethod,
+        due_date: r.due
+      })
+    });
+    const data = await res.json();
+
+    if (!data.ok) { showToast('⚠️ ' + data.error, true); return; }
+
+    // ✅ update local state from DB response
+    r.paid    = data.paid_amount;
+    r.total   = data.grand_total;
+    r.settled = nv;
+    r.sMethod = document.getElementById('pemth-' + id)?.value || r.sMethod;
+    r.sNote   = document.getElementById('penote-' + id)?.value || '';
+    r.editing = false;
+
+    showToast('✅ Payment updated');
+    payRender();
+
+  } catch (err) {
+    showToast('⚠️ ' + err.message, true);
+  }
 }
 
 function payCancelEdit(id){const r=payData.find(i=>i.id===id);if(r){r.editing=false;payRender();}}
 
-function payUndoSettle(id){
-  const r=payData.find(i=>i.id===id);if(!r)return;
-  r.paid=Math.max(0,r.paid-(r.settled||0));
-  r.settled=null;r.sNote='';r.editing=false;payRender();
+/* ── Undo a payment ── */
+async function payUndoSettle(id) {
+  const r = payData.find(i => i.id === id);
+  if (!r) return;
+
+  try {
+    const res  = await fetch(`/payment_undo/${id}/`, {
+      method:  'POST',
+      headers: { 'X-CSRFToken': getCsrf() }
+    });
+    const data = await res.json();
+
+    if (!data.ok) { showToast('⚠️ ' + data.error, true); return; }
+
+    r.paid    = 0;
+    r.settled = null;
+    r.sNote   = '';
+    r.editing = false;
+
+    showToast('↩️ Payment undone');
+    payRender();
+
+  } catch (err) {
+    showToast('⚠️ Network error: ' + err.message, true);
+  }
 }
+
 
 function paySrt(k){if(paySK===k)paySA=!paySA;else{paySK=k;paySA=true;}payPg=1;payRender();}
 function payGp(p){payPg=p;payRender();}
@@ -2097,23 +2180,49 @@ function openPayEditModal(id) {
   document.getElementById('payEditOverlay').classList.add('open');
 }
 
-function savePayEdit() {
+
+/* ── Save from edit modal ── */
+async function savePayEdit() {
   const r = payData.find(i => i.id === payEditId);
   if (!r) return;
+
   const total = parseFloat(document.getElementById('peTotal').value) || 0;
   const paid  = parseFloat(document.getElementById('pePaid').value)  || 0;
-  if (total <= 0) { showToast('⚠️ Total must be greater than 0', true); return; }
+
+  if (total <= 0) { showToast('⚠️ Total must be > 0', true); return; }
   if (paid > total) { showToast('⚠️ Paid cannot exceed total', true); return; }
-  r.total   = total;
-  r.paid    = paid;
-  r.sMethod = document.getElementById('peMeth').value;
-  r.due     = document.getElementById('peDue').value;
-  r.sNote   = document.getElementById('peNote').value;
-  r.settled = paid > 0 ? paid : null;
-  r.editing = false;
-  closePayModals();
-  payRender();
-  showToast('✅ Payment record updated');
+
+  try {
+    const res  = await fetch(`/payment_edit/${payEditId}/`, {
+      method:  'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': getCsrf() },
+      body: JSON.stringify({
+        total:    total,
+        paid:     paid,
+        method:   document.getElementById('peMeth').value,
+        due_date: document.getElementById('peDue').value
+      })
+    });
+    const data = await res.json();
+
+    if (!data.ok) { showToast('⚠️ ' + data.error, true); return; }
+
+    // ✅ update local state from DB response
+    r.total   = data.grand_total;
+    r.paid    = data.paid_amount;
+    r.sMethod = data.payment_method;
+    r.due     = data.due_date;
+    r.sNote   = document.getElementById('peNote').value;
+    r.settled = paid > 0 ? paid : null;
+    r.editing = false;
+
+    closePayModals();
+    payRender();
+    showToast('✅ Payment record updated');
+
+  } catch (err) {
+    showToast('⚠️ ' + err.message, true);
+  }
 }
 
 function openPayDelModal(id) {
