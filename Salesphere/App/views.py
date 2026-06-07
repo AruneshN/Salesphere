@@ -385,8 +385,7 @@ def edit_payment(request, invoice_id):
 
         invoice = Bill.objects.get(id=invoice_id)
 
-        # ✅ Only set real fields
-        invoice.grand_total    = total
+        # invoice.grand_total    = total
         invoice.paid_amount    = paid
         invoice.payment_method = method
 

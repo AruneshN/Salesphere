@@ -1230,6 +1230,10 @@ td{padding:10px 12px;vertical-align:middle;overflow:hidden;text-overflow:ellipsi
     <div class="fgrid">
       <div class="fg"><label>Invoice</label><input id="peInv" type="text" readonly style="opacity:0.6;cursor:not-allowed"></div>
       <div class="fg"><label>Customer</label><input id="peCust" type="text" readonly style="opacity:0.6;cursor:not-allowed"></div>
+      <!-- edit my me -->
+      <div class="fg"><label>QTY </label><input id="peQty" type="number" min="0" step="0.01"></div>
+      <div class="fg"><label>unit price (₹)</label><input id="peUnitPrice" type="number" min="0" step="0.01"></div>
+<!-- ------------------------------- -->
       <div class="fg"><label>Total Amount (₹)</label><input id="peTotal" type="number" min="0" step="0.01"></div>
       <div class="fg"><label>Amount Paid (₹)</label><input id="pePaid" type="number" min="0" step="0.01"></div>
       <div class="fg"><label>Payment Method</label>
@@ -2174,6 +2178,11 @@ function openPayEditModal(id) {
   document.getElementById('peCust').value  = r.cust;
   document.getElementById('peTotal').value = r.total;
   document.getElementById('pePaid').value  = r.paid;
+  // edit by me
+      document.getElementById('peQty').value = r.qty;
+    document.getElementById('peUnitPrice').value = r.unitPrice;
+  
+
   document.getElementById('peMeth').value  = r.sMethod || 'Cash';
   document.getElementById('peDue').value   = r.due;
   document.getElementById('peNote').value  = r.sNote || '';
