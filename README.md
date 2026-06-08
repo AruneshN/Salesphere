@@ -479,7 +479,7 @@ http://127.0.0.1:5000
 
 ### Product Management
 
-![Product Management](screenshots/products.png)
+![Product Management](Screenshots/products.png)
 
 ### Customer Management
 
