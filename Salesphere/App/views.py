@@ -131,28 +131,29 @@ class add_product(LoginRequiredMixin,TemplateView):
             "productform":productform,
         })
 
-class add_customer(LoginRequiredMixin,TemplateView):
-    template_name="dashboard.html"
-    login_url='/'
 
-    def get(self,request,*args,**kwargs):
-        customerform=Customerform()
-        return render(request,self.template_name,context={
-            'active_page':'products',
-            'customerform':customerform
-        })
-    def post(self,request,*args,**kwargs):
-        customerform=Customerform(request.POST)
+
+class add_customer(LoginRequiredMixin, TemplateView):
+    template_name = "dashboard.html"
+    login_url = '/'
+
+    def get(self, request, *args, **kwargs):
+        return render(request, self.template_name)  # ✅ context processor handles everything
+
+    def post(self, request, *args, **kwargs):
+        customerform = Customerform(request.POST)
+        print("FORM ERRORS:", customerform.errors)
+
         if customerform.is_valid():
-            customer=customerform.save(commit=False)
-            customer.store=request.user.store
+            customer = customerform.save(commit=False)
+            customer.store = request.user.store
             customer.save()
-            return render(request,self.template_name,context={
-                "customerform":Customerform()
-            })
-        return render(request,self.template_name,context={
-                "customerform":customerform
-            })
+            print("✅ Customer saved:", customer.id)
+            return redirect('add-customer')
+        
+        print("❌ Not saved")
+        return redirect('add-customer')  # ✅ always redirect — context processor re-runs on GET
+
 
 # bill creation
 def get_financial_year():
