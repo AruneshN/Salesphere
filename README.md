@@ -212,8 +212,6 @@ Supported GST Rates:
 - 28%
 
 ---
-
----
 ## 🚀 Live Demo
 
 🌐 Live Application: [https://your-app-name.up.railway.app](https://salesphere-production.up.railway.app/)
