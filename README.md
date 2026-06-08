@@ -469,35 +469,25 @@ http://127.0.0.1:5000
 ## 📸 Screenshots
 
 ### Login Page
-
-<<<<<<< HEAD
-![Login Page](screenshots/login-page.png)
+![Login Page](Screenshots/login.png)
 
 ### Dashboard
+![Dashboard](Screenshots/dashboard.png)
 
-![Dashboard](screenshots/dashboard.png)
-
-### Product Management
-
-![Product Management](Screenshots/products.png)
+### Add Products
+![Add Products](Screenshots/Products.png)
 
 ### Customer Management
-
-![Customer Management](screenshots/customers.png)
+![Customer Management](Screenshots/customers.png)
 
 ### Create Invoice
-
-![Create Invoice](screenshots/create-invoice.png)
+![Create Invoice](Screenshots/invoices.png)
 
 ### Inventory Management
-
-![Inventory Management](screenshots/inventory.png)
+![Inventory Management](Screenshots/Inventory.png)
 
 ### Payments
-
-![Payments](screenshots/payments.png)
-
-
+![Payments](Screenshots/Payments.png)
 ---
 
 ## Future Improvements
