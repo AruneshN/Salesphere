@@ -90,7 +90,7 @@ Salesphere is a Django-based Store Management and Billing System designed for sm
 - Django
 
 ### Database
-- SQLite (Development)
+- PostgreSQL
 
 ### Frontend
 - HTML
@@ -213,6 +213,13 @@ Supported GST Rates:
 
 ---
 
+---
+## 🚀 Live Demo
+
+🌐 Live Application: [https://your-app-name.up.railway.app](https://salesphere-production.up.railway.app/)
+
+
+---
 ## Installation
 
 ### Clone Repository
@@ -469,35 +476,25 @@ http://127.0.0.1:5000
 ## 📸 Screenshots
 
 ### Login Page
-
-<<<<<<< HEAD
-![Login Page](screenshots/login-page.png)
+![Login Page](Screenshots/login.png)
 
 ### Dashboard
+![Dashboard](Screenshots/dashboard.png)
 
-![Dashboard](screenshots/dashboard.png)
-
-### Product Management
-
-![Product Management](Screenshots/products.png)
+### Add Products
+![Add Products](Screenshots/Products.png)
 
 ### Customer Management
-
-![Customer Management](screenshots/customers.png)
+![Customer Management](Screenshots/customers.png)
 
 ### Create Invoice
-
-![Create Invoice](screenshots/create-invoice.png)
+![Create Invoice](Screenshots/invoices.png)
 
 ### Inventory Management
-
-![Inventory Management](screenshots/inventory.png)
+![Inventory Management](Screenshots/Inventory.png)
 
 ### Payments
-
-![Payments](screenshots/payments.png)
-
-
+![Payments](Screenshots/Payments.png)
 ---
 
 ## Future Improvements
@@ -536,31 +533,6 @@ Python Developer | Django Developer
 
 ---
 
-## License
-
-This project is licensed under the MIT License.
-=======
-Add screenshot here:
-
-```text
-screenshots/login.png
-```
-
-### Dashboard
-
-Add screenshot here:
-
-```text
-screenshots/dashboard.png
-```
-
-### Customer Management
-
-Add screenshot here:
-
-```text
-screenshots/customers.png
-```
 
 ---
 
@@ -638,19 +610,13 @@ This project is licensed under the MIT License.
 
 **Arunesh Natarajan**
 
-Python Developer | Flask Developer | Future Software Entrepreneur
+Full Stack Developer
 
-GitHub: https://github.com/your-username
+GitHub: [https://github.com/your-username](https://github.com/AruneshN)
 
 ---
 
-## ⭐ Support
 
-If you find this project useful, consider giving it a star on GitHub.
-
-```bash
-⭐ Star this repository
-```
 
 Thank you for visiting Salesphere.
 >>>>>>> 52a5cd29b7736c2d7602dd0ef9e5d27756a4d761
