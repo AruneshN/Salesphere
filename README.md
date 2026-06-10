@@ -214,6 +214,12 @@ Supported GST Rates:
 ---
 ## 🚀 Live Demo
 
+<<<<<<< HEAD
+=======
+---
+## 🚀 Live Demo
+
+>>>>>>> seperate-css-js
 🌐 Live Application: [https://your-app-name.up.railway.app](https://salesphere-production.up.railway.app/)
 
 
