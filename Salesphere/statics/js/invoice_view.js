@@ -16,12 +16,14 @@ function toggleView() {
       }
     }
 
-function downloadPDF() {
+function downloadPDF(billNum) {
   const invoice = document.getElementById('invoice');
+  const BillNum = billNum.replace(/\//g, '-');
+
 
   const options = {
     margin:       10,
-    filename:     'Quote_QU240322_FKT_LIMITED.pdf',
+    filename:    BillNum + ".pdf",
     image:        { type: 'jpeg', quality: 0.98 },
     html2canvas:  { scale: 2, useCORS: true },
     jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }

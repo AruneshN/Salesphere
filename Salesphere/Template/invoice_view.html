@@ -14,14 +14,14 @@
   <div class="toolbar" id="toolbar">
     <div class="toolbar-title">
       Invoice Viewer
-      <span>{{invoice_data.Bill_num}} · FKT LIMITED</span>
+      <span>{{invoice_data.Bill_num}} · {{store.store_name}}</span>
     </div>
     <div class="toolbar-actions">
       <button class="btn btn-view" onclick="toggleView()">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
         <span id="view-btn-text">Hide</span>
       </button>
-      <button class="btn btn-download" onclick="downloadPDF()">
+      <button class="btn btn-download" onclick="downloadPDF('{{invoice_data.Bill_num}}')">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
         Download PDF
       </button>
@@ -91,7 +91,7 @@
             <td>{{forloop.counter}}</td>
             <td>{{item.product_name}}</td>
             <td>{{item.unit_price}}</td>
-            <td>{{item.tax}} %</td>
+            <td>{{item.tax}}%</td>
             <td>{{item.quantity}}</td>
             <td>$ {{item.line_subtotal}}</td>
           </tr>
