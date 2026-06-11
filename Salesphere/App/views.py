@@ -1,6 +1,6 @@
 from django.shortcuts import render,redirect
 from django.http import HttpResponse,JsonResponse
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView,DetailView
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth import authenticate,login,logout
 from . import forms
@@ -217,7 +217,22 @@ class createbill(LoginRequiredMixin, TemplateView):
             "billform": billform,
             "billitemform": billitemform
         })
-    
+
+
+
+# ==================================== invoice views
+class invoice_view(LoginRequiredMixin,DetailView):
+    model=Bill
+    template_name="invoice_view.html"
+    context_object_name="invoice_data"
+
+    def get_context_data(self, **kwargs):
+        context= super().get_context_data(**kwargs)
+        context["store"]=self.request.user.store
+        context["items"]=self.object.billitem_set.all()
+        return context
+
+
 # ======================================= stock alert
 
 class stock_alert(LoginRequiredMixin,TemplateView):

@@ -1,0 +1,145 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Invoice #QU240322</title>
+  <link rel="stylesheet" href="{% static 'css/invoice.css' %}">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+</head>
+<body>
+
+  <!-- Toolbar -->
+  <div class="toolbar" id="toolbar">
+    <div class="toolbar-title">
+      Invoice Viewer
+      <span>{{invoice_data.Bill_num}} · FKT LIMITED</span>
+    </div>
+    <div class="toolbar-actions">
+      <button class="btn btn-view" onclick="toggleView()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+        <span id="view-btn-text">Hide</span>
+      </button>
+      <button class="btn btn-download" onclick="downloadPDF()">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download PDF
+      </button>
+    </div>
+  </div>
+
+  <!-- Invoice -->
+  <div class="page-wrapper">
+    <div class="invoice" id="invoice">
+
+      <!-- Header -->
+      <div class="inv-header">
+        <div>
+          <div class="inv-title">Invoice</div>
+          <div class="inv-number">{{invoice_data.Bill_num}}</div>
+        </div>
+        <div class="inv-dates">
+          <div>Issue date : {{invoice_data.bill_date}}</div>
+          <div>Due date &nbsp;&nbsp;: {{invoice_data.due_date}}</div>
+        </div>
+      </div>
+
+      <div class="hr-thick"></div>
+
+      <!-- Parties -->
+      <div class="parties">
+        <div>
+          <div class="party-label">From:</div>
+          <div class="party-body">
+            {{store.store_name}}<br/>
+            <!-- fkt@gmail.com<br/> -->
+            {{store.mobile_number}}<br/>
+            {{store.address}}
+          </div>
+        </div>
+        <div>
+          <div class="party-label">To:</div>
+          <div class="party-body">
+            {{invoice_data.customer}}<br/>
+             {% if invoice_data.customer.email %}
+                {{invoice_data.customer.email}}<br/>
+             {% endif %}
+            {{invoice_data.customer.phone_number}}<br/>
+            {{invoice_data.customer.address}}<br/>
+            {{invoice_data.customer.state}} <br/>
+            {{invoice_data.customer.city}} - {{invoice_data.customer.pincode}} 
+            
+          </div>
+        </div>
+      </div>
+
+      <!-- Line items -->
+      <table class="items-table">
+        <thead>
+          <tr>
+            <th>Line number</th>
+            <th>Item</th>
+            <th>Unit price</th>
+            <th>Tax</th>
+            <th>Quantity</th>
+            <th>Item total</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            {% for item in items %}
+            <td>{{forloop.counter}}</td>
+            <td>{{item.product_name}}</td>
+            <td>{{item.unit_price}}</td>
+            <td>{{item.tax}} %</td>
+            <td>{{item.quantity}}</td>
+            <td>$ {{item.line_subtotal}}</td>
+          </tr>
+          
+        </tbody>
+      </table>
+
+      <!-- Totals -->
+      <div class="totals-section">
+        <div class="totals-block">
+          <div class="hr-thin" style="margin-bottom:0"></div>
+          <div class="totals-row">
+            <span class="totals-label">Sub-total</span>
+            <span class="totals-amount">$ {{item.line_subtotal}}</span>
+          </div>
+          <div class="totals-row">
+            <span class="totals-label">Tax</span>
+            <span class="totals-amount">${{item.tax_amount}}</span>
+          </div>
+          <div class="hr-medium"></div>
+          <div class="total-final-row">
+            <span class="total-final-label">Total:</span>
+            <span class="total-final-amount">{{item.line_total}}</span>
+          </div>
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Footer -->
+      <div class="inv-footer">
+        <div class="footer-note">
+          This quotation is only valid for 30 days and the set prices will not be altered within this period.
+        </div>
+        <div class="sig-line"></div>
+      </div>
+
+      <!-- Powered by -->
+      <div class="powered-by">
+        Powered by <span class="brand">Salesphere.</span><br/>
+        This quote is created with Salesphere and is protected by Salesphere Terms &amp; Conditions. It cannot be reproduced without permission.
+      </div>
+
+    </div>
+  </div>
+
+  <script src="{% static 'js/invoice_view.js' %}">
+    
+  </script>
+
+</body>
+</html>

@@ -11,6 +11,7 @@ urlpatterns = [
     path('add_product/',views.add_product.as_view(),name="add-new-product"),
     path("add_customer/",views.add_customer.as_view(),name="add-customer"),
     path("create_bill/",views.createbill.as_view(),name="create-bill"),
+    path("invoice_view/<int:pk>/",views.invoice_view.as_view(),name="view_invoice"),
     path("stock_alert/",views.stock_alert.as_view(),name="stock-alert"),
     path("stock/update/<int:product_id>/", views.update_stock, name="update-stock"),
     path("allstocks/",views.Allproducts.as_view()),

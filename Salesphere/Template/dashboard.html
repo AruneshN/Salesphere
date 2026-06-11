@@ -400,7 +400,11 @@
                           {% endif %}
 
                     </span></td>
-                    <td><button class="btn btn-ghost btn-sm" onclick="showToast('👁️ Viewing {{invoice.Bill_num}}')">View</button></td></tr>
+                    <!-- <td><button class="btn btn-ghost btn-sm" onclick="showToast('👁️ Viewing {{invoice.Bill_num}}')">View</button></td></tr> -->
+                     <td>
+                      <a href="{% url 'view_invoice' invoice.pk %}" class="btn btn-ghost btn-sm" target="_blank">view</a>
+                      <!-- <button class="btn btn-ghost btn-sm" onclick="showToast('👁️ Viewing {{invoice.Bill_num}}')">View</button> -->
+                    </td></tr>
                     {% endfor %}
         </tbody>
       </table>
