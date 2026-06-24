@@ -123,6 +123,7 @@ class add_product(LoginRequiredMixin,TemplateView):
         if productform.is_valid():
             product=productform.save(commit=False)
             product.store=request.user.store
+            product.current_stock=product.opening_stock
             product.save()
             return render(request,self.template_name,context={
                 "productform":Productform()
